@@ -10,36 +10,33 @@
 #include <omp.h>
 #include <Eigen/Dense>
 
-// --- 1. 参数设置 (Parameters) ---
-const int N = 256;              // 粒子网格的一边大小 (Particle grid side size)
-const double L = 50.0;          // 模拟盒子的物理尺寸 (Mpc/h) (Physical size of the simulation box)
-const double BOX_RES = L / N;   // 盒子分辨率 (Box resolution)
-const int DIM = 2;              // 维度 (Dimensions)
+// ———————————— 模拟参数 ————————————
+const int N = 256;              // 粒子网格的一边大小
+const double L = 50.0;          // 模拟盒子的物理尺寸 (Mpc/h) 
+const double BOX_RES = L / N;   // 盒子分辨率
+const int DIM = 2;              // 维度
 const int TOTAL_PARTICLES = N * N;
 
-// 宇宙学参数 (Cosmological Parameters)
+// 宇宙学参数
 const double H0 = 68.0;
 const double OmegaM = 0.31;
 const double OmegaL = 0.69;
 const double OmegaK = 1.0 - OmegaM - OmegaL;
 const double G_CONST = 3.0 / 2.0 * OmegaM * H0 * H0;
 
-// 模拟时间参数 (Simulation Time Parameters)
-const double A_INIT = 0.02;    // 初始尺度因子 (Initial scale factor)
-const double A_FINAL = 4.0;    // 终止尺度因子 (Final scale factor)
-const double DT = 0.02;        // 时间步长 (Time step)
+// 模拟时间参数
+const double A_INIT = 0.02;    // 初始尺度因子
+const double A_FINAL = 4.0;    // 终止尺度因子
+const double DT = 0.02;        // 时间步长
 
-// 初始条件参数 (Initial Condition Parameters)
-const double POWER_LAW_N = -0.5; // 功率谱指数 (Power spectrum index)
-const double SCALE_SIGMA = 0.2;  // 平滑尺度 (Smoothing scale)
-const double FIELD_AMPLITUDE = 10.0; // 场振幅 (Field amplitude)
-const unsigned int SEED = 4;     // 随机种子 (Random seed)
+// 初始条件参数
+const double POWER_LAW_N = -0.5; // 功率谱指数
+const double SCALE_SIGMA = 0.2;  // 平滑尺度
+const double FIELD_AMPLITUDE = 10.0; // 场振幅
+const unsigned int SEED = 4;     // 随机种子
 
-// 使用 Eigen 的二维向量 (Using Eigen's 2D vector)
 using Vec2D = Eigen::Vector2d;
-// 定义一个 std::vector 来存储 Eigen 向量，并确保内存对齐
-// Define a std::vector to store Eigen vectors with aligned memory
-using VectorOfVec2D = std::vector<Vec2D, Eigen::aligned_allocator<Vec2D>>;
+using VectorOfVec2D = std::vector<Vec2D, Eigen::aligned_allocator<Vec2D>>; // 确保内存对齐
 
 
 // --- 辅助函数和物理计算 (Helper Functions and Physics Calculations) ---
@@ -178,7 +175,7 @@ void save_data(const VectorOfVec2D& pos, const VectorOfVec2D& mom, double time) 
     snprintf(buffer, sizeof(buffer), "data/x.%05d.bin", time_ms);
     std::ofstream outfile(buffer, std::ios::binary);
     if (!outfile) {
-        std::cerr << "Error opening file for writing: " << buffer << std::endl;
+        std::cerr << "Error opening file: " << buffer << std::endl;
         return;
     }
     outfile.write(reinterpret_cast<const char*>(pos.data()), pos.size() * sizeof(Vec2D));
