@@ -84,7 +84,7 @@ double da_dt(double a) {
  * @param pos 粒子位置 (Particle positions in grid units)
  * @param target 输出的密度网格 (Output density grid)
  */
-void md_cic_2d(const VectorOfVec2D& pos, fftw_complex* target) {
+void cic(const VectorOfVec2D& pos, fftw_complex* target) {
     #pragma omp parallel for
     for(int i = 0; i < N * N; ++i) {
         target[i][0] = 0.0;
@@ -138,7 +138,7 @@ void md_cic_2d(const VectorOfVec2D& pos, fftw_complex* target) {
  * @param x 粒子位置 (particle positions in grid units)
  * @return 插值后的值 (Interpolated values)
  */
-Vec2D interp_2d(const VectorOfVec2D& data_grid, const Vec2D& x) {
+Vec2D interp(const VectorOfVec2D& data_grid, const Vec2D& x) {
     int idx0 = static_cast<int>(std::floor(x.x()));
     int idx1 = static_cast<int>(std::floor(x.y()));
     double xm = x.x() - idx0;
@@ -303,7 +303,7 @@ int main() {
                 x_grid[i] = pos[i] / BOX_RES;
             }
 
-            md_cic_2d(x_grid, delta_grid);
+            cic(x_grid, delta_grid);
 
             double mean_density = TOTAL_PARTICLES / (double)(N*N);
             #pragma omp parallel for
@@ -349,7 +349,7 @@ int main() {
             VectorOfVec2D acc(TOTAL_PARTICLES);
             #pragma omp parallel for
             for (int i = 0; i < TOTAL_PARTICLES; ++i) {
-                acc[i] = interp_2d(acc_grid, x_grid[i]);
+                acc[i] = interp(acc_grid, x_grid[i]);
             }
             
             double dt_da = da_dt(a);

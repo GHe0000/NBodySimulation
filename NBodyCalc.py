@@ -11,16 +11,15 @@ DIM = 2          # 维度
 H0 = 68.0
 OmegaM = 0.31
 OmegaL = 0.69
-# H0 = 70.0
-# OmegaM = 1.0
-# OmegaL = 0.0
-OmegaK = 1 - OmegaM - OmegaL
+OmegaK = 1 - OmegaM - OmegaL # OmegaK = 0.0
 G_const = 3./2 * OmegaM * H0**2
 
 A_INIT = 0.02    # 初始尺度因子
 A_FINAL = 1.0    # 终止尺度因子
 DT = 0.005        # 时间步长
 
+# NOTE: 模拟中的功率谱和现实宇宙中的不同，这里用了
+#       一个及其简单的基于幂律分布的功率谱
 POWER_LAW_N = -0.5 # 功率谱指数
 SCALE_SIGMA = 0.2  # 平滑尺度
 FIELD_AMPLITUDE = 10.0 # 场振幅
