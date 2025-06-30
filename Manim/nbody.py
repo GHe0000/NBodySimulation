@@ -2,12 +2,9 @@ from manim import *
 import numpy as np
 import random
 
-class NBodySymmetric(Scene):
-    # --- 关键参数 ---
-    # 将你在优化器中找到的最佳种子填在这里！
-    BEST_SEED = 42  # <--- 你可以修改这里来观察不同扰动的结果
+class NBody(Scene):
+    BEST_SEED = 42
 
-    # --- 模拟参数 ---
     N_PARTICLES = 5
     G = 2
     DAMPING_FACTOR = 0.999
@@ -15,8 +12,10 @@ class NBodySymmetric(Scene):
     SOFTENING_FACTOR = 0.1
     PERTURBATION_STRENGTH = 0.1
     ACCELERATION_SCALE = 0.15
-    # 【新增】动画速度调节。值越小，动画越慢。
     SIMULATION_SPEED = 0.2
+
+    MIN_ARROW_LENGTH = 0.2
+    MAX_ARROW_LENGTH = 0.8
 
     def construct(self):
         """
@@ -26,6 +25,7 @@ class NBodySymmetric(Scene):
         np.random.seed(self.BEST_SEED)
 
         self.masses = np.random.uniform(3.0, 5.0, (self.N_PARTICLES,))
+        particle_colors = [BLUE, GREEN, RED, YELLOW, PURPLE]
 
         # 2. 设置一个对称的环形轨道构型
         R = 2.5  # 轨道半径
@@ -59,7 +59,7 @@ class NBodySymmetric(Scene):
         # --- 创建 Manim 对象 ---
         self.particles = VGroup(*[
             Dot(point=pos, radius=0.05 * mass**0.5).set_color(color)
-            for pos, mass, color in zip(initial_positions, self.masses, [BLUE, GREEN, RED, YELLOW, PURPLE])
+            for pos, mass, color in zip(initial_positions, self.masses, particle_colors)
         ])
 
         for i, p in enumerate(self.particles):
@@ -68,15 +68,16 @@ class NBodySymmetric(Scene):
 
         trails = VGroup(*[TracedPath(p.get_center, stroke_width=2, stroke_color=p.get_color()) for p in self.particles])
         
+        # 使用 Vector 代替 Arrow，以获得更好的箭头缩放效果
         acceleration_vectors = VGroup()
         for p in self.particles:
-            arrow = Arrow(p.get_center(), p.get_center() + RIGHT * 1e-6, buff=p.get_radius(), stroke_width=3, max_tip_length_to_length_ratio=0.3)
-            arrow.set_opacity(0)
-            acceleration_vectors.add(arrow)
+            # 初始化一个零长度的矢量
+            vec = Vector([0, 0, 0], tip_length=0.15, color=p.get_color())
+            acceleration_vectors.add(vec)
 
         # --- 核心更新逻辑 ---
         def update_system(group, dt):
-            # 【已修改】通过缩放dt来减慢模拟速度
+            # 通过缩放dt来减慢模拟速度
             sim_dt = dt * self.SIMULATION_SPEED
 
             positions = np.array([p.get_center() for p in group])
@@ -97,12 +98,34 @@ class NBodySymmetric(Scene):
                 p.velocity *= self.DAMPING_FACTOR
                 p.move_to(p.get_center() + p.velocity * sim_dt)
             
+            # 更新加速度矢量
             for i, p in enumerate(group):
                 vec = acceleration_vectors[i]
-                accel_norm = np.linalg.norm(p.acceleration)
+                accel = p.acceleration
+                accel_norm = np.linalg.norm(accel)
+                
                 if accel_norm > 1e-6:
-                    vec.set_opacity(1)
-                    vec.put_start_and_end_on(p.get_center(), p.get_center() + p.acceleration * self.ACCELERATION_SCALE)
+                    # 根据加速度的大小（模长）来设置箭头的粗细
+                    stroke_width = np.clip(2 + accel_norm * 1.5, 2, 12)
+                    
+                    # 【已修改】对箭头的长度进行限制
+                    scaled_length = accel_norm * self.ACCELERATION_SCALE
+                    clamped_length = np.clip(scaled_length, self.MIN_ARROW_LENGTH, self.MAX_ARROW_LENGTH)
+                    direction = accel / accel_norm
+                    
+                    # 创建一个临时的“目标”矢量，它拥有所有我们期望的属性
+                    target_vec = Vector(
+                        direction * clamped_length, # 使用限制长度后的矢量
+                        color=p.get_color(),
+                        tip_length=0.15
+                    )
+                    target_vec.set_stroke(width=stroke_width)
+                    target_vec.move_to(p.get_center() + target_vec.get_vector() / 2) # 将矢量中心对准粒子
+                    
+                    # 让场景中的矢量“变成”目标矢量的样子
+                    vec.become(target_vec)
+                    vec.set_opacity(0.8)
+
                 else:
                     vec.set_opacity(0)
 
