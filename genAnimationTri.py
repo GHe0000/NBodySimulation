@@ -90,7 +90,7 @@ if __name__ == "__main__":
 
     output_filename = 'nbody.mp4'
     try:
-        anim.save(output_filename, writer='ffmpeg', fps=15, dpi=150,
+        anim.save(output_filename, writer='ffmpeg', fps=15, dpi=300,
                   progress_callback=lambda i, n: print(f'Save: {i+1}/{n}'))
         print(f"\nSave in file: '{output_filename}'")
     except Exception as e:

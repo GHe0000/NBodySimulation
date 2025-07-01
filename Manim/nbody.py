@@ -2,6 +2,9 @@ from manim import *
 import numpy as np
 import random
 
+# CN_FONT = "思源黑体 CN" # Arch Linux
+CN_FONT = "Source Han Sans CN" # Windows
+
 class NBody(Scene):
     BEST_SEED = 42
 
@@ -18,9 +21,6 @@ class NBody(Scene):
     MAX_ARROW_LENGTH = 0.8
 
     def construct(self):
-        """
-        构建 Manim 场景和动画。
-        """
         # --- 设置种子以复现优化结果 ---
         np.random.seed(self.BEST_SEED)
 
@@ -129,11 +129,7 @@ class NBody(Scene):
                 else:
                     vec.set_opacity(0)
 
-        # --- 运行动画 ---
         self.particles.add_updater(update_system)
         self.add(trails, self.particles, acceleration_vectors)
         self.wait(self.TOTAL_DURATION)
         self.particles.remove_updater(update_system)
-
-# 要运行此脚本，请在终端中使用以下命令：
-# manim -pql your_script_name.py NBodySymmetric

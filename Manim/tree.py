@@ -6,9 +6,6 @@ CN_FONT = "Source Han Sans CN" # Windows
 class Tree(Scene):
     def construct(self):
         np.random.seed(114)
-        # title = Text("基于树的算法可视化", font=CN_FONT).to_edge(UP)
-        # self.play(Write(title))
-        # self.wait(1)
 
         target_particle = Dot(point=LEFT * 5, radius=0.15, color=YELLOW)
         target_label = Text("目标粒子", font=CN_FONT, font_size=24).next_to(target_particle, DOWN)

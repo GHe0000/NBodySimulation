@@ -3,10 +3,12 @@ import numpy as np
 import numba
 
 # --- 模拟参数设置 ---
-N = 256          # 粒子网格的一边大小
+N = 256          # 粒子网格的一边大小 
 L = 50.0         # 模拟盒子的物理尺寸 (Mpc/h)
 BOX_RES = L / N  # 盒子分辨率
 DIM = 2          # 维度
+
+# （总共 65536 个粒子）
 
 H0 = 68.0
 OmegaM = 0.31
