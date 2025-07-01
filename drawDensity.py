@@ -40,7 +40,8 @@ def plot_density_for_time(shape, L, time, bbox, ax):
 
     im = ax.imshow(density_grid.T, origin='lower', cmap='viridis',
                    extent=[0, L, 0, L],
-                   norm=colors.LogNorm(vmin=0.1, vmax=density_grid.max()))
+                   norm=colors.LogNorm(vmin=0.1, vmax=density_grid.max()),
+                   interpolation='bilinear')
 
     ax.set_xlim(*bbox[0])
     ax.set_ylim(*bbox[1])
