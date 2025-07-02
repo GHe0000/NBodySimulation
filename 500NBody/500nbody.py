@@ -4,12 +4,13 @@ from matplotlib.animation import FuncAnimation
 import numba
 from tqdm import tqdm
 
+# --- 模拟参数 ---
 N = 500
 R = 1.0
 C_SOFTENING = 0.05
 DT = 0.001
-HALO_MASS_RATIO = 0.0
-SIGMA_CONST = 0.4
+HALO_MASS_RATIO = 2.5 # 修改此值来模拟有或无暗物质晕的情况
+SIGMA_CONST = 0.4 # Toomre Q 常数
 G = 1.0
 PARTICLE_MASS = 1.0
 
@@ -18,6 +19,7 @@ def calculate_accelerations(pos, mass, halo_mass, G, softening, disk_radius):
     n_particles = pos.shape[0]
     acc = np.zeros((n_particles, 3))
 
+    # 粒子间引力加速度
     for i in range(n_particles):
         for j in range(i + 1, n_particles):
             r_vec = pos[j] - pos[i]
@@ -28,6 +30,7 @@ def calculate_accelerations(pos, mass, halo_mass, G, softening, disk_radius):
             acc[i] += force_vec / mass[i]
             acc[j] -= force_vec / mass[j]
 
+    # 暗物质晕引力加速度
     if halo_mass > 0:
         for i in range(n_particles):
             r_vec = pos[i]
@@ -45,13 +48,14 @@ def calculate_accelerations(pos, mass, halo_mass, G, softening, disk_radius):
     return acc
 
 def setup_initial_conditions(n, r_disk, m_particle, sigma_k):
+    # --- 0. 计算质量并准备数组 ---
+    disk_mass_total = n * m_particle
+    halo_mass = disk_mass_total * HALO_MASS_RATIO
     pos = np.zeros((n, 3))
     vel = np.zeros((n, 3))
     mass = np.ones(n) * m_particle
 
-    # --- 1. 设置粒子初始位置 ---
-    # 目标：表面密度 Σ(r) ∝ r⁻¹
-    # 方法：将盘面分为 N/10 个环和 10 个扇区，每个小单元内随机放置一个粒子。
+    # --- 1. 设置初始位置 ---
     n_rings = n // 10
     n_segments = 10
     particles_per_ring = n_segments
@@ -63,43 +67,47 @@ def setup_initial_conditions(n, r_disk, m_particle, sigma_k):
             phi_min = j * (2 * np.pi / n_segments)
             phi_max = (j + 1) * (2 * np.pi / n_segments)
             
-            # 在单元格内随机选择 r 和 phi
-            rand_r = np.sqrt(np.random.uniform(r_min**2, r_max**2)) # 均匀面积采样
+            rand_r = np.sqrt(np.random.uniform(r_min**2, r_max**2))
             rand_phi = np.random.uniform(phi_min, phi_max)
             
             idx = i * particles_per_ring + j
             pos[idx, 0] = rand_r * np.cos(rand_phi)
             pos[idx, 1] = rand_r * np.sin(rand_phi)
-            pos[idx, 2] = 0.0 # 初始为平坦的盘
+            pos[idx, 2] = 0.0
 
-    # --- 2. 设置初始旋转速度 ---
-    # 方法：估算每个粒子维持圆形轨道所需的速度。
-    # 首先计算初始位置下的加速度
-    initial_acc = calculate_accelerations(pos, mass, 0.0, G, C_SOFTENING, r_disk)
+    # --- 2. 设置基础旋转速度 ---
+    # 加速度计算包含暗物质晕，以保证平衡正确
+    initial_acc = calculate_accelerations(pos, mass, halo_mass, G, C_SOFTENING, r_disk)
     
-    # 将粒子按半径分组
     radii = np.sqrt(pos[:,0]**2 + pos[:,1]**2)
     ring_indices = (radii / (r_disk / n_rings)).astype(int)
+    # FIX: 防止粒子在盘面最外边缘时索引越界
+    ring_indices[ring_indices >= n_rings] = n_rings - 1
     
     v_circ_profile = np.zeros(n_rings)
     for i in range(n_rings):
         mask = (ring_indices == i)
         if not np.any(mask): continue
         
-        # 计算该环内 < -r · a_r > 的平均值
         r_dot_a = pos[mask, 0] * initial_acc[mask, 0] + pos[mask, 1] * initial_acc[mask, 1]
-        v_circ_profile[i] = np.sqrt(np.mean(-r_dot_a))
+        
+        # FIX: 防止因数值误差导致均值为负，从而开方失败产生NaN
+        mean_val = np.mean(-r_dot_a)
+        v_circ_profile[i] = np.sqrt(max(0, mean_val))
 
-    # 为每个粒子赋予其所在环的平均旋转速度
     for i in range(n):
+        # FIX: 跳过中心粒子，防止除以零
+        if radii[i] == 0: continue
         ring_idx = ring_indices[i]
         v_mag = v_circ_profile[ring_idx]
         vel[i, 0] = -v_mag * pos[i, 1] / radii[i]
         vel[i, 1] =  v_mag * pos[i, 0] / radii[i]
 
-    # --- 3. 增加速度弥散 (Velocity Dispersion) ---
+    # --- 3. 增加速度弥散 ---
     ring_radii_avg = np.array([(i + 0.5) * (r_disk / n_rings) for i in range(n_rings)])
-    d_ln_v_d_ln_r = np.gradient(np.log(v_circ_profile), np.log(ring_radii_avg))
+    # FIX: 防止因速度为0导致log(0)错误
+    safe_v_profile = np.where(v_circ_profile > 0, v_circ_profile, 1e-9)
+    d_ln_v_d_ln_r = np.gradient(np.log(safe_v_profile), np.log(ring_radii_avg))
     
     sigma_r_vals, sigma_theta_vals, sigma_z_vals = np.zeros(n_rings), np.zeros(n_rings), np.zeros(n_rings)
 
@@ -107,29 +115,38 @@ def setup_initial_conditions(n, r_disk, m_particle, sigma_k):
         v = v_circ_profile[i]
         if v == 0: continue
 
-        # Fix
-        term_for_sqrt = 1 + d_ln_v_d_ln_r[1]
+        term_for_sqrt = 1 + d_ln_v_d_ln_r[i]
         if term_for_sqrt < 0:
             term_for_sqrt = 0
         nu_val = v * np.sqrt(term_for_sqrt)
-        sigma_r_T = sigma_k * np.pi * G * (particles_per_ring * m_particle / (2 * np.pi * ring_radii_avg[i] * (r_disk/n_rings))) / nu_val
-        sigma_r_S = 0.4 * v
         
+        # FIX: 防止 nu_val 为零导致除以零
+        if nu_val == 0:
+            sigma_r_T = np.inf # 设为无穷大，这样 min() 会自动选择另一个值
+        else:
+            sigma_r_T = sigma_k * np.pi * G * (particles_per_ring * m_particle / (2 * np.pi * ring_radii_avg[i] * (r_disk/n_rings))) / nu_val
+        
+        sigma_r_S = 0.4 * v
         sigma_r = min(sigma_r_T, sigma_r_S)
+        # sigma_r = sigma_k * np.pi * G * (particles_per_ring * m_particle / (2 * np.pi * ring_radii_avg[i] * (r_disk/n_rings))) / nu_val
 
-        if i == n_rings - 1:
-            sigma_r /= 2.0
 
-        term_for_sqrt = 1 + d_ln_v_d_ln_r[1]
-        if term_for_sqrt < 0:
-            term_for_sqrt = 0
-        sigma_theta = sigma_r / (np.sqrt(2) * np.sqrt(term_for_sqrt))
+        if i >= n_rings - 1:
+            sigma_r /= 2
+
+        # FIX: 再次检查 term_for_sqrt 防止除以零
+        if term_for_sqrt == 0:
+            sigma_theta = 0 # 如果轨道临界不稳定，切向弥散也设为0
+        else:
+            sigma_theta = sigma_r / (np.sqrt(2) * np.sqrt(term_for_sqrt))
+        
         sigma_z = sigma_theta
 
         sigma_r_vals[i], sigma_theta_vals[i], sigma_z_vals[i] = sigma_r, sigma_theta, sigma_z
 
     vel_before_random = vel.copy()
     for i in range(n):
+        if radii[i] == 0: continue
         r, phi = radii[i], np.arctan2(pos[i,1], pos[i,0])
         ring_idx = ring_indices[i]
         
@@ -159,10 +176,9 @@ def run_simulation(sim_time, dt, pos, vel, mass, halo_mass, G, softening, disk_r
     num_steps = int(sim_time / dt)
     positions_history = np.zeros((num_steps, pos.shape[0], 3))
     
-
     acc = calculate_accelerations(pos, mass, halo_mass, G, softening, disk_radius)
 
-    for step in tqdm(range(num_steps)):
+    for step in tqdm(range(num_steps), desc="Simulating"):
         vel += acc * (dt / 2.0)
         pos += vel * dt
         
@@ -175,10 +191,12 @@ def run_simulation(sim_time, dt, pos, vel, mass, halo_mass, G, softening, disk_r
 
 if __name__ == '__main__':
     pos_init, vel_init, mass, P_outer = setup_initial_conditions(N, R, PARTICLE_MASS, SIGMA_CONST)
-    SIM_TIME = P_outer * 1.0
+    SIM_TIME = P_outer * 2.0 # 模拟两个外圈轨道周期
     disk_mass_total = N * PARTICLE_MASS
     halo_mass_total = disk_mass_total * HALO_MASS_RATIO
+    
     positions_history = run_simulation(SIM_TIME, DT, pos_init, vel_init, mass, halo_mass_total, G, C_SOFTENING, R)
+    
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.set_facecolor('black')
     ax.set_xticks([])
@@ -199,8 +217,9 @@ if __name__ == '__main__':
         current_time_tau = (frame * DT) / P_outer
         time_text.set_text(f'τ = {current_time_tau:.2f}')
         return scatter, time_text
-
-    frame_step = 1
+    
+    num_steps = int(SIM_TIME / DT)
+    frame_step = max(1, int(num_steps / 400)) # 保证动画总帧数在400左右
     num_frames = positions_history.shape[0] // frame_step
     
     ani = FuncAnimation(fig,
@@ -210,13 +229,12 @@ if __name__ == '__main__':
                         blit=True,
                         interval=30)
 
-
-    output_filename = f"Halo_{int(HALO_MASS_RATIO)}.mp4"
-
-    try:
-        ani.save(output_filename, writer='ffmpeg', fps=15, dpi=300)
-        print(f"Save in file: {output_filename}")
-    except Exception as e:
-        print(f"Error: {e}")
+    # output_filename = f"Halo_{int(HALO_MASS_RATIO*10)}.mp4"
+    #
+    # try:
+    #     ani.save(output_filename, writer='ffmpeg', fps=30, dpi=200, progress_callback=lambda i, n: print(f'Saving frame {i} of {n}'))
+    #     print(f"Animation saved to: {output_filename}")
+    # except Exception as e:
+    #     print(f"Error saving animation: {e}")
 
     plt.show()
