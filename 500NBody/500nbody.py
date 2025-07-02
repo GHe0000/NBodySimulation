@@ -1,0 +1,222 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+import numba
+from tqdm import tqdm
+
+N = 500
+R = 1.0
+C_SOFTENING = 0.05
+DT = 0.001
+HALO_MASS_RATIO = 0.0
+SIGMA_CONST = 0.4
+G = 1.0
+PARTICLE_MASS = 1.0
+
+@numba.njit(fastmath=True)
+def calculate_accelerations(pos, mass, halo_mass, G, softening, disk_radius):
+    n_particles = pos.shape[0]
+    acc = np.zeros((n_particles, 3))
+
+    for i in range(n_particles):
+        for j in range(i + 1, n_particles):
+            r_vec = pos[j] - pos[i]
+            dist_sq = r_vec[0]**2 + r_vec[1]**2 + r_vec[2]**2
+            inv_r3 = (dist_sq + softening**2)**(-1.5)
+            force_mag = G * mass[i] * mass[j] * inv_r3
+            force_vec = force_mag * r_vec
+            acc[i] += force_vec / mass[i]
+            acc[j] -= force_vec / mass[j]
+
+    if halo_mass > 0:
+        for i in range(n_particles):
+            r_vec = pos[i]
+            r_mag = np.sqrt(r_vec[0]**2 + r_vec[1]**2 + r_vec[2]**2)
+            if r_mag == 0:
+                continue
+            
+            if r_mag < disk_radius:
+                scalar_acc = -(1.1**2 * halo_mass) / (disk_radius * (r_mag + 0.1 * disk_radius)**2)
+            else:
+                scalar_acc = - (halo_mass / r_mag**3)
+
+            acc[i] += scalar_acc * r_vec
+            
+    return acc
+
+def setup_initial_conditions(n, r_disk, m_particle, sigma_k):
+    pos = np.zeros((n, 3))
+    vel = np.zeros((n, 3))
+    mass = np.ones(n) * m_particle
+
+    # --- 1. 设置粒子初始位置 ---
+    # 目标：表面密度 Σ(r) ∝ r⁻¹
+    # 方法：将盘面分为 N/10 个环和 10 个扇区，每个小单元内随机放置一个粒子。
+    n_rings = n // 10
+    n_segments = 10
+    particles_per_ring = n_segments
+    
+    for i in range(n_rings):
+        r_min = i * (r_disk / n_rings)
+        r_max = (i + 1) * (r_disk / n_rings)
+        for j in range(n_segments):
+            phi_min = j * (2 * np.pi / n_segments)
+            phi_max = (j + 1) * (2 * np.pi / n_segments)
+            
+            # 在单元格内随机选择 r 和 phi
+            rand_r = np.sqrt(np.random.uniform(r_min**2, r_max**2)) # 均匀面积采样
+            rand_phi = np.random.uniform(phi_min, phi_max)
+            
+            idx = i * particles_per_ring + j
+            pos[idx, 0] = rand_r * np.cos(rand_phi)
+            pos[idx, 1] = rand_r * np.sin(rand_phi)
+            pos[idx, 2] = 0.0 # 初始为平坦的盘
+
+    # --- 2. 设置初始旋转速度 ---
+    # 方法：估算每个粒子维持圆形轨道所需的速度。
+    # 首先计算初始位置下的加速度
+    initial_acc = calculate_accelerations(pos, mass, 0.0, G, C_SOFTENING, r_disk)
+    
+    # 将粒子按半径分组
+    radii = np.sqrt(pos[:,0]**2 + pos[:,1]**2)
+    ring_indices = (radii / (r_disk / n_rings)).astype(int)
+    
+    v_circ_profile = np.zeros(n_rings)
+    for i in range(n_rings):
+        mask = (ring_indices == i)
+        if not np.any(mask): continue
+        
+        # 计算该环内 < -r · a_r > 的平均值
+        r_dot_a = pos[mask, 0] * initial_acc[mask, 0] + pos[mask, 1] * initial_acc[mask, 1]
+        v_circ_profile[i] = np.sqrt(np.mean(-r_dot_a))
+
+    # 为每个粒子赋予其所在环的平均旋转速度
+    for i in range(n):
+        ring_idx = ring_indices[i]
+        v_mag = v_circ_profile[ring_idx]
+        vel[i, 0] = -v_mag * pos[i, 1] / radii[i]
+        vel[i, 1] =  v_mag * pos[i, 0] / radii[i]
+
+    # --- 3. 增加速度弥散 (Velocity Dispersion) ---
+    ring_radii_avg = np.array([(i + 0.5) * (r_disk / n_rings) for i in range(n_rings)])
+    d_ln_v_d_ln_r = np.gradient(np.log(v_circ_profile), np.log(ring_radii_avg))
+    
+    sigma_r_vals, sigma_theta_vals, sigma_z_vals = np.zeros(n_rings), np.zeros(n_rings), np.zeros(n_rings)
+
+    for i in range(n_rings):
+        v = v_circ_profile[i]
+        if v == 0: continue
+
+        # Fix
+        term_for_sqrt = 1 + d_ln_v_d_ln_r[1]
+        if term_for_sqrt < 0:
+            term_for_sqrt = 0
+        nu_val = v * np.sqrt(term_for_sqrt)
+        sigma_r_T = sigma_k * np.pi * G * (particles_per_ring * m_particle / (2 * np.pi * ring_radii_avg[i] * (r_disk/n_rings))) / nu_val
+        sigma_r_S = 0.4 * v
+        
+        sigma_r = min(sigma_r_T, sigma_r_S)
+
+        if i == n_rings - 1:
+            sigma_r /= 2.0
+
+        term_for_sqrt = 1 + d_ln_v_d_ln_r[1]
+        if term_for_sqrt < 0:
+            term_for_sqrt = 0
+        sigma_theta = sigma_r / (np.sqrt(2) * np.sqrt(term_for_sqrt))
+        sigma_z = sigma_theta
+
+        sigma_r_vals[i], sigma_theta_vals[i], sigma_z_vals[i] = sigma_r, sigma_theta, sigma_z
+
+    vel_before_random = vel.copy()
+    for i in range(n):
+        r, phi = radii[i], np.arctan2(pos[i,1], pos[i,0])
+        ring_idx = ring_indices[i]
+        
+        rand_vr = np.random.normal(0, sigma_r_vals[ring_idx])
+        rand_vtheta = np.random.normal(0, sigma_theta_vals[ring_idx])
+        rand_vz = np.random.normal(0, sigma_z_vals[ring_idx])
+
+        vel[i, 0] += rand_vr * np.cos(phi) - rand_vtheta * np.sin(phi)
+        vel[i, 1] += rand_vr * np.sin(phi) + rand_vtheta * np.cos(phi)
+        vel[i, 2] += rand_vz
+        
+    for i in range(n_rings):
+        mask = (ring_indices == i)
+        if not np.any(mask): continue
+        ke_before = 0.5 * np.sum(mass[mask, np.newaxis] * vel_before_random[mask]**2)
+        ke_after = 0.5 * np.sum(mass[mask, np.newaxis] * vel[mask]**2)
+        if ke_after == 0: continue
+        scale_factor = np.sqrt(ke_before / ke_after)
+        vel[mask] *= scale_factor
+        
+    v_outer = v_circ_profile[-1]
+    orbital_period = 2 * np.pi * r_disk / v_outer if v_outer > 0 else 10.0
+    
+    return pos, vel, mass, orbital_period
+
+def run_simulation(sim_time, dt, pos, vel, mass, halo_mass, G, softening, disk_radius):
+    num_steps = int(sim_time / dt)
+    positions_history = np.zeros((num_steps, pos.shape[0], 3))
+    
+
+    acc = calculate_accelerations(pos, mass, halo_mass, G, softening, disk_radius)
+
+    for step in tqdm(range(num_steps)):
+        vel += acc * (dt / 2.0)
+        pos += vel * dt
+        
+        acc = calculate_accelerations(pos, mass, halo_mass, G, softening, disk_radius)
+        
+        vel += acc * (dt / 2.0)
+        
+        positions_history[step] = pos
+    return positions_history
+
+if __name__ == '__main__':
+    pos_init, vel_init, mass, P_outer = setup_initial_conditions(N, R, PARTICLE_MASS, SIGMA_CONST)
+    SIM_TIME = P_outer * 1.0
+    disk_mass_total = N * PARTICLE_MASS
+    halo_mass_total = disk_mass_total * HALO_MASS_RATIO
+    positions_history = run_simulation(SIM_TIME, DT, pos_init, vel_init, mass, halo_mass_total, G, C_SOFTENING, R)
+    fig, ax = plt.subplots(figsize=(8, 8))
+    ax.set_facecolor('black')
+    ax.set_xticks([])
+    ax.set_yticks([])
+    plt.tight_layout()
+
+    scatter = ax.scatter(positions_history[0, :, 0], positions_history[0, :, 1], s=5, c='white', alpha=0.8)
+    time_text = ax.text(0.05, 0.95, '', transform=ax.transAxes, color='white', fontsize=12)
+
+    def init_animation():
+        lim = R * 1.5
+        ax.set_xlim(-lim, lim)
+        ax.set_ylim(-lim, lim)
+        return scatter, time_text
+
+    def animate(frame):
+        scatter.set_offsets(positions_history[frame, :, 0:2])
+        current_time_tau = (frame * DT) / P_outer
+        time_text.set_text(f'τ = {current_time_tau:.2f}')
+        return scatter, time_text
+
+    frame_step = 1
+    num_frames = positions_history.shape[0] // frame_step
+    
+    ani = FuncAnimation(fig,
+                        lambda frame: animate(frame * frame_step),
+                        frames=num_frames,
+                        init_func=init_animation,
+                        blit=True,
+                        interval=30)
+
+
+    output_filename = f"Halo_{int(HALO_MASS_RATIO)}.mp4"
+
+    try:
+        ani.save(output_filename, writer='ffmpeg', fps=15, dpi=300)
+        print(f"Save in file: {output_filename}")
+    except Exception as e:
+        print(f"Error: {e}")
+
+    plt.show()
