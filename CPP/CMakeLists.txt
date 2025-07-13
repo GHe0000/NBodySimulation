@@ -10,6 +10,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(SOURCE 
+    src/initial.cpp
+    src/io.cpp
+    src/utils.cpp
+    src/possion.cpp
     src/main.cpp
 )
 

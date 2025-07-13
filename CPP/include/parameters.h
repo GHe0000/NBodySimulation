@@ -6,6 +6,10 @@
 #include <fftw3.h>
 
 // ———————————— 模拟参数 ————————————
+// 模拟参数
+const int NUM_THREADS = 8;      // 并行线程数
+
+// 粒子网格参数
 const int N = 256;              // 粒子网格的一边大小
 const double L = 50.0;          // 模拟盒子的物理尺寸 (Mpc/h)
 const double BOX_RES = L / N;   // 盒子分辨率
@@ -23,12 +27,6 @@ const double G_CONST = 3.0 / 2.0 * OmegaM * H0 * H0;
 const double A_INIT = 0.02;     // 初始尺度因子
 const double A_FINAL = 4.0;     // 终止尺度因子i
 const double DT = 0.02;         // 时间步长 (以尺度因子 a 为单位)
-
-// 初始条件参数
-const double POWER_LAW_N = -0.5; // 功率谱指数
-const double SCALE_SIGMA = 0.2;  // 平滑尺度
-const double FIELD_AMPLITUDE = 10.0; // 场振幅
-const unsigned int SEED = 4;     // 随机种子
 
 // 使用 Eigen 库定义二维向量及其动态数组
 using Vec2D = Eigen::Vector2d;

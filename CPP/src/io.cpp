@@ -18,7 +18,7 @@ SimIO::SimIO(const std::string& data_dir) : data_dir_(data_dir) {
 void SimIO::save_data(const VectorOfVec2D& pos, const VectorOfVec2D& mom, double time) const {
     int time_ms = static_cast<int>(round(time * 1000));
     char buffer[100];
-    snprintf(buffer, sizeof(buffer), "%s/x.%05d.bin", data_dir_.c_str(), time_ms);
+    snprintf(buffer, sizeof(buffer), "%s/%05d.bin", data_dir_.c_str(), time_ms);
 
     std::ofstream outfile(buffer, std::ios::binary);
     if (!outfile) {

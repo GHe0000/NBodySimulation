@@ -1,7 +1,6 @@
 #include "poisson.h"
 #include "utils.h"
 
-#include <iostream>
 #include <cmath>
 #include <omp.h>
 
@@ -126,7 +125,7 @@ VectorOfVec2D PoissonSolver::calculate_acceleration(const VectorOfVec2D& pos, do
             double kx = k_indices_x[i];
             double ky = k_indices_y[j];
             double k_mag_sq = kx * kx + ky * ky;
-            double potential_kernel = -k_pow_safe(k_mag_sq, -2.0);
+            double potential_kernel = -utils::k_pow_safe(k_mag_sq, -2.0);
             phi_f[idx][0] = delta_f[idx][0] * potential_kernel;
             phi_f[idx][1] = delta_f[idx][1] * potential_kernel;
         }
