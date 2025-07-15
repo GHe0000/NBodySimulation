@@ -324,8 +324,8 @@ End
 \use_hyperref false
 \papersize a4
 \use_geometry false
-\use_package amsmath 1
-\use_package amssymb 1
+\use_package amsmath 2
+\use_package amssymb 2
 \use_package cancel 1
 \use_package esint 1
 \use_package mathdots 1
@@ -388,7 +388,502 @@ End
 \end_layout
 
 \begin_layout Section
-NBody 宇宙学模拟的基本过程
+宇宙学基本方程
+\end_layout
+
+\begin_layout Standard
+在宇宙学中，
+一个重要的假设是：
+宇宙是
+\series bold
+均匀
+\series default
+且
+\series bold
+各向同性
+\series default
+的，
+当然，
+实际的宇宙并没有我们所假设的那么绝对均匀，
+在较小的尺度上，
+物质的涨落是不可忽略的（毕竟如果是一个完全均匀的宇宙也不会形成各种各样的天体结构），
+当然，
+我们的宇宙整体而言还是相当均匀的，
+因此，
+我们使用微扰来分析物质涨落，
+这里我们只需要讨论一阶微扰即可得到较为精确的结果，
+即 
+\begin_inset Formula $\rho\left(\boldsymbol{x},t\right)=\bar{\rho}\left(t\right)\left(1+\delta\left(\boldsymbol{x},t\right)\right)$
+\end_inset
+
+，
+因此有微扰场：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\delta\left(\boldsymbol{x},t\right)=\frac{\rho\left(\boldsymbol{x},t\right)-\bar{\rho}\left(t\right)}{\bar{\rho}\left(t\right)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+其中，
+
+\begin_inset Formula $\bar{\rho}$
+\end_inset
+
+ 是宇宙的平均物质密度.
+\end_layout
+
+\begin_layout Subsection
+Friedmann 方程
+\end_layout
+
+\begin_layout Standard
+背景宇宙的哈勃参数 
+\begin_inset Formula $H$
+\end_inset
+
+ 和宇宙的标度因子 
+\begin_inset Formula $a$
+\end_inset
+
+ 之间的关系由 Friedmann 方程给出：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+H\left(a\right)=H_{0}\sqrt{\Omega_{m0}a^{-3}+\Omega_{\Lambda0}}=H_{0}E\left(a\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+其中，
+
+\begin_inset Formula $\Omega_{m0}$
+\end_inset
+
+ 为今天的宇宙物质密度，
+
+\begin_inset Formula $\Omega_{\Lambda0}$
+\end_inset
+
+ 为今天的宇宙暗能量密度.
+ 另外，
+减速参数由下式给出：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+q=\frac{\Omega_{m0}a^{-3}-2\Omega_{\Lambda0}}{2E^{2}\left(a\right)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+傅里叶变换
+\end_layout
+
+\begin_layout Standard
+我们考虑一个边长为 
+\begin_inset Formula $l$
+\end_inset
+
+ 的共动体积 
+\begin_inset Formula $V=l\times l\times l$
+\end_inset
+
+，
+为了避免“边界效应”（由于我们模拟的体积是有限的，
+如果边界外没有物质，
+则靠近边界的粒子会受到一个额外的指向内部的引力，
+导致和现实有所不同），
+因此我们一般使用
+\series bold
+周期性边界条件
+\series default
+，
+也就是 
+\begin_inset Formula $\delta\left(x\right)=\delta\left(x+l\right)$
+\end_inset
+
+ （三个方向都满足），
+因此，
+我们可以对微扰场做傅里叶变换，
+有：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\hat{\delta}\left(\boldsymbol{k}\right)=\int_{\in V}\mathrm{d}^{3}x\ \exp\left(-\mathrm{i}\boldsymbol{k}\cdot\boldsymbol{x}\right)\delta\left(\boldsymbol{x}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+实空间的周期性使得傅里叶空间是离散的，
+也就是 
+\series bold
+
+\begin_inset Formula $\boldsymbol{k}$
+\end_inset
+
+
+\series default
+ 的取值为：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\boldsymbol{k}=2\pi\left(\frac{n_{1}}{l}\hat{\boldsymbol{i}}+\frac{n_{2}}{l}\hat{\boldsymbol{j}}+\frac{n_{3}}{l}\hat{\boldsymbol{k}}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+其中：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+n_{1},n_{2},n_{3}=0,\pm1,\pm2,\pm3,\dots
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+功率谱
+\end_layout
+
+\begin_layout Standard
+功率谱 
+\begin_inset Formula $P\left(k\right)$
+\end_inset
+
+ 定义为：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left\langle \hat{\delta}\left(\boldsymbol{k}\right)\cdot\hat{\delta}^{*}\left(\boldsymbol{k}'\right)\right\rangle =V\delta_{\boldsymbol{k},\boldsymbol{k}'}P\left(k\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+这里 
+\begin_inset Formula $\left\langle \dots\right\rangle $
+\end_inset
+
+ 表示对里面的内容做平均，
+
+\begin_inset Formula $\delta_{\boldsymbol{k},\boldsymbol{k}'}$
+\end_inset
+
+ 为 Kronecker 函数.
+ 不难发现，
+功率谱 
+\begin_inset Formula $P\left(k\right)$
+\end_inset
+
+ 描述的是，
+在特定尺度 
+\begin_inset Formula $k$
+\end_inset
+
+ 上，
+密度涨落的振幅的平方的平均值.
+ 换句话说也就是 
+\begin_inset Formula $P\left(k\right)$
+\end_inset
+
+ 描述了宇宙在不同尺度上的“成团”的程度.
+\end_layout
+
+\begin_layout Standard
+另外，
+上述定义中假定了功率谱是各向同性的，
+也就是其与方向无关，
+
+\begin_inset Formula $P\left(\boldsymbol{k}\right)=P\left(k\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+粒子动力学
+\end_layout
+
+\begin_layout Standard
+由于宇宙是在膨胀的，
+因此两点之间的距离会随着时间的增加而增加，
+即使两点相对背景网格都没有任何移动.
+ 为了方便讨论，
+我们引入共动坐标 
+\begin_inset Formula $\boldsymbol{x}$
+\end_inset
+
+，
+若粒子相对背景网格没有移动，
+则其共动坐标不会发生变化.
+ 与之相对的则是物理坐标 
+\begin_inset Formula $\boldsymbol{r}$
+\end_inset
+
+，
+两个坐标之间由标度因子 
+\begin_inset Formula $\boldsymbol{a}$
+\end_inset
+
+ 联系：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\boldsymbol{r}=a\boldsymbol{x}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+并且，
+我们定义今天宇宙的标度因子为 
+\begin_inset Formula $a=1$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+对于一个粒子，
+其在引力场 
+\begin_inset Formula $p\left(\boldsymbol{r}\right)$
+\end_inset
+
+ 中的拉氏量为（记粒子质量 
+\begin_inset Formula $m=1$
+\end_inset
+
+）：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\mathcal{L} & =\frac{1}{2}\dot{\boldsymbol{r}}^{2}-\phi\left(\boldsymbol{r}\right)\\
+ & =\frac{1}{2}\left(\dot{a}^{2}\dot{\boldsymbol{x}}^{2}+a^{2}\dot{\boldsymbol{x}}^{2}+2a\dot{a}\boldsymbol{x}\dot{\boldsymbol{x}}\right)-\phi\left(\boldsymbol{x}\right)\\
+ & =\frac{1}{2}a^{2}\dot{\boldsymbol{x}}^{2}-\frac{1}{2}a\ddot{a}\boldsymbol{x}^{2}-\phi\left(\boldsymbol{x}\right)+\frac{\mathrm{d}}{\mathrm{dt}}\left(\frac{1}{2}a\dot{a}\boldsymbol{x}^{2}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+上式中最后一项略去，
+因此有：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathcal{L}=\frac{1}{2}a^{2}\dot{\boldsymbol{x}}^{2}-\Phi\left(\boldsymbol{x}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+其中：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Phi\left(\boldsymbol{x}\right)=\phi\left(x\right)+\frac{1}{2}a\ddot{a}\boldsymbol{x}^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+对于一个均匀且各项同性的宇宙，
+有
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\ddot{a}\boldsymbol{x}=-\frac{4}{3}\pi r^{3}\bar{\rho}\frac{G}{r^{2}}\hat{\boldsymbol{r}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+即：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\ddot{a}=-\frac{4}{3}\pi a\bar{\rho}G
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+由于 
+\begin_inset Formula $\phi$
+\end_inset
+
+ 满足泊松方程：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\nabla_{x}^{2}\phi\left(\boldsymbol{x}\right)=4\pi G\rho a^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+因此有：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\nabla_{x}^{2}\Phi\left(\boldsymbol{x}\right) & =\nabla_{x}^{2}\left(\phi\left(\boldsymbol{x}\right)+\frac{1}{2}a\ddot{a}\boldsymbol{x}^{2}\right)\\
+ & =\nabla_{x}^{2}\phi\left(\boldsymbol{x}\right)+\frac{1}{2}a\ddot{a}\nabla_{x}^{2}\boldsymbol{x}^{2}\\
+ & =4\pi G\rho a^{2}+3a\ddot{a}\\
+ & =4\pi Ga^{2}\left(\frac{\rho}{\bar{\rho}}-1\right)\\
+ & =4\pi Ga^{2}\bar{\rho}\delta\left(\boldsymbol{x}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+之前的拉格朗日量可以写出对应的哈密顿量：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathcal{H}=\frac{\boldsymbol{v}^{2}}{2a^{2}}+\Phi\left(\boldsymbol{x}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+其对应的哈密顿方程给出：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\mathrm{d}\boldsymbol{x}}{\mathrm{d}t} & =\frac{\partial\mathcal{H}}{\partial\boldsymbol{v}}=\frac{\boldsymbol{v}}{a^{2}}\\
+\frac{\mathrm{d}\boldsymbol{v}}{\mathrm{d}t} & =-\frac{\partial\mathcal{H}}{\partial\boldsymbol{x}}=-\frac{\partial\Phi\left(\boldsymbol{x}\right)}{\partial\boldsymbol{x}}=-\nabla\Phi\left(\boldsymbol{x}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+在模拟中，
+我们一般使用标度因子 
+\begin_inset Formula $a$
+\end_inset
+
+ 为变量，
+因此 
+\begin_inset Formula $\mathrm{d}t=\mathrm{d}a/\dot{a}=\mathrm{d}a/aH\left(a\right)$
+\end_inset
+
+，
+于是有：
+
+\end_layout
+
+\begin_layout Subsection
+红移空间畸变
+\end_layout
+
+\begin_layout Subsection
+Zel'dovich 近似
 \end_layout
 
 \begin_layout Section
@@ -436,14 +931,6 @@ NBody 宇宙学模拟的基本过程
 我们通过天文观测得到的 CMB 功率谱生成出早期的引力势，
 而位置坐标和动量坐标则通过 Zeldovich 近似给出.
  
-\end_layout
-
-\begin_layout Subsection
-功率谱
-\end_layout
-
-\begin_layout Subsection
-Zeldovich 近似
 \end_layout
 
 \begin_layout Section
@@ -861,7 +1348,7 @@ w_{i}=1-\frac{x_{p}-x_{i}}{H}\quad\text{and}\quad w_{i+1}=\frac{x_{p}-x_{i}}{H}
 \series default
 算法来执行 DFT，
 其计算复杂度为 O(M log M)，
-其中 M 是网格点的总数（在 NM͂ 的情况下，
+其中 M 是网格点的总数（在 NM 的情况下，
 复杂度为 O(N log N)）.
 \end_layout
 
