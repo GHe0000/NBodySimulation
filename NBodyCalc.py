@@ -49,7 +49,6 @@ def generate_initial_potential(shape, L, power_law_n, scale_sigma, seed):
     k_max = shape[0] * np.pi / L
 
     # b. 定义功率谱 P(k)
-    # 对应 `cft.Power_law`, `cft.Scale`, `cft.Cutoff`
     pk = k_pow(K, power_law_n) # Power_law
 
     for i in range(DIM):

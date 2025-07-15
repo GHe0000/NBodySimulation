@@ -1,0 +1,995 @@
+#LyX 2.4 created this file. For more info see https://www.lyx.org/
+\lyxformat 620
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass ctex-article
+\begin_preamble
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{color}
+\usepackage{ulem}
+\usepackage{siunitx}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{hyperref}
+%\usepackage[dvipsnames]{xcolor}
+\usepackage[dvipsnames,svgnames]{xcolor}
+\usepackage{amsmath,mathtools,amsthm,amsfonts,amssymb,bm}
+\usepackage{bm}
+\usepackage{mathrsfs}
+\usepackage[centering,a4paper,body={16cm,25cm}]{geometry}
+\usepackage{subfig}
+\usepackage{threeparttable}
+\usepackage{pifont,mdframed}
+%======================================================================
+\usepackage{tikz}
+
+\usetikzlibrary{shapes.geometric, arrows}
+\usetikzlibrary{shapes,decorations}
+\usetikzlibrary{intersections,decorations.text}
+\usetikzlibrary{backgrounds}
+\usetikzlibrary{arrows,shapes,positioning,shadows,trees,mindmap}
+\usetikzlibrary{tikzmark}
+\usetikzlibrary{calc}
+\usetikzlibrary{arrows.meta}
+
+\usetikzlibrary{quotes,angles}
+\usetikzlibrary{calc}
+\usetikzlibrary{decorations.pathreplacing}
+
+
+\usepackage{tcolorbox}
+\tcbuselibrary{skins, breakable, theorems}
+
+%======================================================================
+% 设置日期显示格式为yyyy-mm-dd
+\def\twodigits#1{\ifnum#1<10 0\fi\the#1}
+\renewcommand{\today}{\number\year-\twodigits\month-\number\day}
+
+\renewcommand{\vec}[1]{\boldsymbol{#1}}
+\newcommand{\ms}[1]{\mathscr{#1}}
+\newcommand{\arsinh}[1]{\mathrm{arsinh} \ #1}
+
+\DeclareMathOperator{\sech}{sech}
+\DeclareMathOperator{\csch}{csch}
+\DeclareMathOperator{\arSinh}{arsinh}
+\DeclareMathOperator{\arCosh}{arcosh}
+\DeclareMathOperator{\arTanh}{artanh}
+
+\everymath{\displaystyle}
+
+\linespread{1.3}
+
+\setlength{\lineskip}{2.5pt}
+\setlength{\lineskiplimit}{2.5pt}
+
+% 浮动参数
+\renewcommand{\textfraction}{0.15}
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.65}
+\renewcommand{\floatpagefraction}{0.60}
+
+% 环境设置
+
+% 环境颜色设置
+\definecolor{greenshade}{rgb}{0.90,1,0.92} %绿色文本框，竖线颜色设为 Green
+\definecolor{redshade}{rgb}{1.00,0.88,0.88} %红色文本框，竖线颜色设为 LightCoral
+\definecolor{brownshade}{rgb}{0.99,0.95,0.9} %莫兰迪棕色，竖线颜色设为 BurlyWood
+\definecolor{lilacshade}{rgb}{0.95,0.93,0.98} %淡紫色，竖线颜色设为 Plum
+\definecolor{orangeshade}{rgb}{1.00,0.88,0.82} %橙色，竖线颜色设为 DarkOrange
+\definecolor{lightblueshade}{rgb}{0.8,0.92,1} %淡蓝色，竖线颜色设为 LightSkyBlue
+
+% 定理环境
+% Black theorem number and optional black title padding above and below
+\newtheoremstyle{boxthmstyle} % Theorem style name
+{0pt} % Space above
+{0pt} % Space below
+{\itshape} % Body font
+{} % Indent amount
+{\bfseries} % Theorem head font
+{.} % Punctuation after theorem head
+{0.25em} % Space after theorem head
+{}
+
+% 背景设置
+\newmdenv[%
+skipabove=7pt, % Whitespace above box
+skipbelow=7pt, % Whitespace below box
+rightline=false, % Right line visible
+leftline=true, % Left line visible
+topline=false, % Top line visible
+bottomline=false, % Bottom line visible
+linecolor=LightSkyBlue, % Line color
+linewidth=4pt, % Line width
+backgroundcolor=LightSkyBlue!15, % Background color
+innerleftmargin=5pt, % Inside left margin width
+innerrightmargin=5pt, % Inside right margin width
+innertopmargin=5pt, % Inside top margin height
+innerbottommargin=5pt, % Inside bottom margin height
+leftmargin=0cm, % Outside left margin width
+rightmargin=0cm % Outside right margin width
+]{thmBox}
+
+\newmdenv[%
+skipabove=7pt, % Whitespace above box
+skipbelow=7pt, % Whitespace below box
+rightline=false, % Right line visible
+leftline=true, % Left line visible
+topline=false, % Top line visible
+bottomline=false, % Bottom line visible
+linecolor=Green, % Line color
+linewidth=4pt, % Line width
+backgroundcolor=green!5, % Background color
+innerleftmargin=5pt, % Inside left margin width
+innerrightmargin=5pt, % Inside right margin width
+innertopmargin=5pt, % Inside top margin height
+innerbottommargin=5pt, % Inside bottom margin height
+leftmargin=0cm, % Outside left margin width
+rightmargin=0cm % Outside right margin width
+]{defiBox}
+
+\newmdenv[%
+skipabove=7pt, % Whitespace above box
+skipbelow=7pt, % Whitespace below box
+rightline=false, % Right line visible
+leftline=true, % Left line visible
+topline=false, % Top line visible
+bottomline=false, % Bottom line visible
+linecolor=gray, % Line color
+linewidth=4pt, % Line width
+backgroundcolor=black!5, % Background color
+innerleftmargin=5pt, % Inside left margin width
+innerrightmargin=5pt, % Inside right margin width
+innertopmargin=5pt, % Inside top margin height
+innerbottommargin=5pt, % Inside bottom margin height
+leftmargin=0cm, % Outside left margin width
+rightmargin=0cm % Outside right margin width
+]{lemBox}
+
+\newmdenv[%
+skipabove=7pt, % Whitespace above box
+skipbelow=7pt, % Whitespace below box
+rightline=false, % Right line visible
+leftline=true, % Left line visible
+topline=false, % Top line visible
+bottomline=false, % Bottom line visible
+linecolor=red, % Line color
+linewidth=4pt, % Line width
+backgroundcolor=red!5, % Background color
+innerleftmargin=5pt, % Inside left margin width
+innerrightmargin=5pt, % Inside right margin width
+innertopmargin=5pt, % Inside top margin height
+innerbottommargin=5pt, % Inside bottom margin height
+leftmargin=0cm, % Outside left margin width
+rightmargin=0cm % Outside right margin width
+]{attentionBox}
+
+% 定义宏
+\theoremstyle{boxthmstyle}
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{ppt}[thm]{Proposition}
+\newenvironment{theorem}{\begin{thmBox}\begin{thm}}{\end{thm}\end{thmBox}}
+\newenvironment{proposition}{\begin{thmBox}\begin{ppt}}{\end{ppt}\end{thmBox}}
+
+\newtheorem{defi}{Definition}[section]
+\newenvironment{definition}{\begin{defiBox}\begin{defi}}{\end{defi}\end{defiBox}}
+
+\newtheorem{lem}[thm]{Lemma}
+\newenvironment{lemma}{\begin{lemBox}\begin{lem}}{\end{lem}\end{lemBox}}
+
+% 其他定理环境
+\theoremstyle{definition}
+\newtheorem{corollary}[thm]{Corollary}
+\newtheorem{example}{Example}[section]
+\newtheorem{question}{Question}[section]
+\newtheorem{remark}{Remark}[section]
+\newenvironment{solution}{\begin{proof}[\bf Solution]}{\end{proof}}
+\renewcommand{\proofname}{\bf Proof}
+
+\newenvironment{attention}{\begin{attentionBox}}{\end{attentionBox}}
+
+% 浮动体设置
+\floatplacement{figure}{htbp}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children no
+\begin_local_layout
+Style Theorem
+	Category              Reasoning
+	Margin                First_Dynamic
+	LatexType             Environment
+	LatexName             theorem
+	NextNoIndent          0
+	ResetArgs             1
+	AddToToc              theorem
+	IsTocCaption          1
+	Argument 1
+		LabelString    "Additional Theorem Text"
+		Tooltip        "Additional text appended to the theorem header"
+		IsTocCaption      1
+	EndArgument
+	LabelSep              xx
+	ParIndent             MMM
+	ParSkip               0.4
+	ItemSep               0.2
+	TopSep                0.7
+	BottomSep             0.7
+	ParSep                0.3
+	Align                 Block
+	AlignPossible         Left
+	LabelType             Static
+	LabelCounter          thm
+	LabelString           "Theorem \thethm."
+	Font
+	  Shape               Italic
+	  Size                Normal
+	EndFont
+	LabelFont
+	  Shape               Up
+	  Series              Bold
+	EndFont
+	DocBookGenerateTitle  true
+	DocBookWrapperMergeWithPrevious  true
+End
+
+Style Proposition
+	CopyStyle             Theorem
+	DependsOn             Theorem
+	LatexName             proposition
+	LabelString           "Proposition \thethm."
+End
+
+Style Corollary
+	CopyStyle             Theorem
+	DependsOn             Theorem
+	LatexName             corollary
+	LabelString           "Corollary \thethm."
+End
+
+Style Lemma
+	CopyStyle             Theorem
+	DependsOn             Theorem
+	LatexName             lemma
+	LabelString           "Lemma \thethm."
+End
+
+Style Definition
+	CopyStyle             Theorem
+	DependsOn             Theorem
+	LatexName             definition
+	LabelCounter          defi
+	LabelString           "Definition \thedefi."
+End
+
+Style Remark
+    Category              Custom
+    Margin                First_Dynamic
+    LatexType             Environment
+    LatexName             remark
+    LabelType             Static
+    LabelString           "Remark."
+    ResetArgs             1
+    ParIndent             MMM
+    TopSep                0.7
+    BottomSep             0.7
+	Font
+	  Shape               Italic
+	  Size                Normal
+	EndFont
+	LabelFont
+	  Shape               Up
+	  Series              Bold
+	EndFont
+    DocBookGenerateTitle  true
+End
+
+Counter thm
+	GuiName Theorem
+End
+
+Counter defi
+	GuiName Definition
+End
+\end_local_layout
+\language chinese-simplified
+\language_package none
+\inputencoding utf8
+\fontencoding auto
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts true
+\font_sc false
+\font_roman_osf false
+\font_sans_osf false
+\font_typewriter_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\float_placement class
+\float_alignment center
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize a4
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_formatted_ref 0
+\use_minted 0
+\use_lineno 0
+\branch MathMacro
+\selected 1
+\filename_suffix 0
+\color background background
+\end_branch
+\index Index
+\shortcut idx
+\color #008080
+\end_index
+\paperwidth 16cm
+\paperheight 25cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tablestyle default
+\tracking_changes false
+\output_changes false
+\change_bars false
+\postpone_fragile_content true
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\docbook_table_output 0
+\docbook_mathml_prefix 1
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+记 M 为维度数，
+记 N 为一边的网格数
+\end_layout
+
+\begin_layout Section
+NBody 宇宙学模拟的基本过程
+\end_layout
+
+\begin_layout Section
+初始条件生成
+\end_layout
+
+\begin_layout Standard
+从理论力学中我们知道，
+在 
+\begin_inset Formula $M$
+\end_inset
+
+ 维空间中，
+描述一个粒子的完整状态需要 
+\begin_inset Formula $2M$
+\end_inset
+
+ 个坐标（
+\begin_inset Formula $M$
+\end_inset
+
+ 个广义坐标和 
+\begin_inset Formula $M$
+\end_inset
+
+ 个广义动量），
+对于 
+\begin_inset Formula $N$
+\end_inset
+
+ 个粒子，
+则一共需要确定 
+\begin_inset Formula $2MN$
+\end_inset
+
+ 个坐标.
+ 因此，
+对于一个 NBody 宇宙学模拟，
+我们需要确定 
+\begin_inset Formula $2MN$
+\end_inset
+
+ 的初始值.
+ 一般而言，
+我们通过天文观测得到的 CMB 功率谱生成出早期的引力势，
+而位置坐标和动量坐标则通过 Zeldovich 近似给出.
+ 
+\end_layout
+
+\begin_layout Subsection
+功率谱
+\end_layout
+
+\begin_layout Subsection
+Zeldovich 近似
+\end_layout
+
+\begin_layout Section
+模拟过程
+\end_layout
+
+\begin_layout Subsection
+Leap-forg 法
+\end_layout
+
+\begin_layout Subsection
+PM 法
+\end_layout
+
+\begin_layout Standard
+在宇宙学 N-Body 模拟中，
+我们需要求解数以百万计甚至百亿计的暗物质粒子在自身引力作用下的演化。
+直接计算任意两个粒子之间的引力（Direct Summation,
+ DS）需要 O(N²) 的计算量，
+这对于大规模模拟是不可接受的。
+粒子-网格（Particle-Mesh,
+ PM）方法是一种经典且高效的算法，
+它将长程引力的计算复杂度降低到 O(N log N)，
+极大地提升了模拟效率.
+\end_layout
+
+\begin_layout Standard
+PM 方法的核心思想是：
+将粒子所代表的离散质量分布“绘制”到一个规则的计算网格上，
+然后在网格上利用快速傅里叶变换（Fast Fourier Transform,
+ FFT）高效地求解引力势，
+再从引力势计算出引力场，
+最后将网格上的引力场插值回粒子所在的位置，
+从而驱动粒子的运动.
+\end_layout
+
+\begin_layout Subsection
+PM 方法的数学框架
+\end_layout
+
+\begin_layout Standard
+整个宇宙的物质密度可以表示为 
+\begin_inset Formula $\rho(\vec{x},t)$
+\end_inset
+
+，
+它产生的引力势 
+\begin_inset Formula $\Phi(\vec{x},t)$
+\end_inset
+
+ 由下面的泊松方程（Poisson's Equation）描述：
+ 
+\begin_inset Formula 
+\[
+\nabla^{2}\Phi(\vec{x},t)=4\pi G\rho(\vec{x},t)
+\]
+
+\end_inset
+
+在宇宙学中，
+通常使用共动坐标（comoving coordinates），
+此时泊松方程会包含宇宙膨胀因子 
+\begin_inset Formula $a(t)$
+\end_inset
+
+，
+形式变为：
+ 
+\begin_inset Formula 
+\[
+\nabla^{2}\Phi=4\pi Ga^{2}\bar{\rho}\delta
+\]
+
+\end_inset
+
+其中 
+\begin_inset Formula $\bar{\rho}$
+\end_inset
+
+ 是宇宙的平均密度，
+
+\begin_inset Formula $\delta=(\rho-\bar{\rho})/\bar{\rho}$
+\end_inset
+
+ 是密度扰动（density contrast）。
+我们的目标就是求解这个方程，
+得到引力势 
+\begin_inset Formula $\Phi$
+\end_inset
+
+，
+然后通过 
+\begin_inset Formula $\vec{g}=-\nabla\Phi$
+\end_inset
+
+ 计算引力场，
+最终更新粒子的速度和位置.
+\end_layout
+
+\begin_layout Standard
+PM 方法将这个求解过程分为以下四个主要步骤：
+ 
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+质量分配（Mass Assignment）
+\series default
+：
+将粒子的质量分配到网格点上，
+得到网格化的密度场.
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+泊松方程求解（Solving Poisson's Equation）
+\series default
+：
+利用 FFT 在傅里叶空间中求解泊松方程，
+得到网格点上的引力势.
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+引力计算（Force Calculation）
+\series default
+：
+通过对引力势求梯度，
+计算出网格点上的引力场.
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+力插值（Force Interpolation）
+\series default
+：
+将网格点上的引力场插值到每个粒子的实际位置.
+\end_layout
+
+\begin_layout Subsection
+质量分配 (Mass Assignment)
+\end_layout
+
+\begin_layout Standard
+第一步是将代表连续质量分布的 N 个离散粒子“云”的质量分配到一个三维的规则网格上。
+假设我们的模拟盒子是一个边长为 L 的立方体，
+被划分为 
+\begin_inset Formula $M\times M\times M$
+\end_inset
+
+ 个网格单元，
+每个网格单元的边长为 
+\begin_inset Formula $H=L/M$
+\end_inset
+
+。
+
+\end_layout
+
+\begin_layout Standard
+令 
+\begin_inset Formula $\vec{x}_{p}$
+\end_inset
+
+ 为第 p 个粒子的位置，
+其质量为 
+\begin_inset Formula $m_{p}$
+\end_inset
+
+。
+网格点的密度 
+\begin_inset Formula $\rho_{i,j,k}$
+\end_inset
+
+ 可以通过一个分配函数 
+\begin_inset Formula $W(\vec{x})$
+\end_inset
+
+ 来计算。
+这个函数将粒子位置 
+\begin_inset Formula $\vec{x}_{p}$
+\end_inset
+
+ 与网格点索引 
+\begin_inset Formula $(i,j,k)$
+\end_inset
+
+ 关联起来。
+ 
+\begin_inset Formula 
+\[
+\rho_{i,j,k}=\frac{1}{H^{3}}\sum_{p}m_{p}W(\vec{x}_{i,j,k}-\vec{x}_{p})
+\]
+
+\end_inset
+
+其中 
+\begin_inset Formula $\vec{x}_{i,j,k}$
+\end_inset
+
+ 是网格点 
+\begin_inset Formula $(i,j,k)$
+\end_inset
+
+ 的坐标.
+ 最常用的分配方案为 CIC 也就是云中单元分配方案.
+ 它将每个粒子看作一个与网格单元同样大小的均匀立方体“云”，
+然后根据该“云”与周围网格单元的重叠体积，
+将质量按比例分配给相邻的 8 个网格点（在三维情况下）。
+这等价于对粒子位置进行线性插值。
+
+\end_layout
+
+\begin_layout Standard
+对于一维情况，
+粒子在 
+\begin_inset Formula $x_{p}$
+\end_inset
+
+ 处，
+其左右两个网格点为 
+\begin_inset Formula $x_{i}$
+\end_inset
+
+ 和 
+\begin_inset Formula $x_{i+1}$
+\end_inset
+
+，
+则分配的权重为：
+ 
+\begin_inset Formula 
+\[
+w_{i}=1-\frac{x_{p}-x_{i}}{H}\quad\text{and}\quad w_{i+1}=\frac{x_{p}-x_{i}}{H}
+\]
+
+\end_inset
+
+在三维中，
+就是这三个方向权重的乘积.
+\end_layout
+
+\begin_layout Subsection
+泊松方程求解 (FFT)
+\end_layout
+
+\begin_layout Standard
+获得网格上的密度场 
+\begin_inset Formula $\rho(\vec{x})$
+\end_inset
+
+ 后（为了简洁，
+我们省略下标 
+\begin_inset Formula $i,j,k$
+\end_inset
+
+），
+下一步是求解泊松方程 
+\begin_inset Formula $\nabla^{2}\Phi=4\pi G\rho$
+\end_inset
+
+。
+直接在实空间求解这个偏微分方程很困难，
+但在傅里叶空间（或 k 空间）它会变成一个简单的代数方程。
+
+\end_layout
+
+\begin_layout Standard
+首先，
+对密度场和引力势进行离散傅里叶变换（Discrete Fourier Transform,
+ DFT）：
+ 
+\begin_inset Formula 
+\[
+\hat{\rho}(\vec{k})=\sum_{\vec{x}}\rho(\vec{x})e^{-i\vec{k}\cdot\vec{x}}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\hat{\Phi}(\vec{k})=\sum_{\vec{x}}\Phi(\vec{x})e^{-i\vec{k}\cdot\vec{x}}
+\]
+
+\end_inset
+
+其中 
+\begin_inset Formula $\vec{k}$
+\end_inset
+
+ 是傅里叶空间中的波矢。
+在傅里叶空间，
+微分算子 
+\begin_inset Formula $\nabla$
+\end_inset
+
+ 变成了代数乘子 
+\begin_inset Formula $i\vec{k}$
+\end_inset
+
+。
+因此，
+
+\begin_inset Formula $\nabla^{2}$
+\end_inset
+
+ 对应于 
+\begin_inset Formula $-|\vec{k}|^{2}$
+\end_inset
+
+。
+泊松方程就变成了：
+ 
+\begin_inset Formula 
+\[
+-|\vec{k}|^{2}\hat{\Phi}(\vec{k})=4\pi G\hat{\rho}(\vec{k})
+\]
+
+\end_inset
+
+于是，
+我们可以直接解出引力势的傅里叶分量：
+ 
+\begin_inset Formula 
+\[
+\hat{\Phi}(\vec{k})=-4\pi G\frac{\hat{\rho}(\vec{k})}{|\vec{k}|^{2}}
+\]
+
+\end_inset
+
+这个代数方程的求解非常简单。
+我们定义傅里叶空间中的
+\series bold
+格林函数（Green's function）
+\series default
+ 
+\begin_inset Formula $\hat{G}(\vec{k})$
+\end_inset
+
+：
+ 
+\begin_inset Formula 
+\[
+\hat{G}(\vec{k})=-\frac{4\pi G}{|\vec{k}|^{2}}
+\]
+
+\end_inset
+
+于是，
+
+\begin_inset Formula $\hat{\Phi}(\vec{k})=\hat{G}(\vec{k})\hat{\rho}(\vec{k})$
+\end_inset
+
+。
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+注意
+\series default
+：
+对于 
+\begin_inset Formula $\vec{k}=0$
+\end_inset
+
+ 的模式（对应宇宙的平均密度），
+分母为零。
+这个模式不产生引力，
+通常设 
+\begin_inset Formula $\hat{\Phi}(\vec{k}=0)=0$
+\end_inset
+
+。
+此外，
+由于网格的离散性，
+拉普拉斯算子 
+\begin_inset Formula $\nabla^{2}$
+\end_inset
+
+ 和波矢 
+\begin_inset Formula $\vec{k}$
+\end_inset
+
+ 实际上需要使用它们的有限差分近似形式，
+以获得更高的精度。
+例如，
+波数分量 
+\begin_inset Formula $k_{x}$
+\end_inset
+
+ 可以用 
+\begin_inset Formula $k_{x}=\frac{2}{H}\sin(\frac{\pi i}{M})$
+\end_inset
+
+ 来代替简单的 
+\begin_inset Formula $i/H$
+\end_inset
+
+。
+
+\end_layout
+
+\begin_layout Standard
+实际计算中，
+我们使用
+\series bold
+快速傅里叶变换（FFT）
+\series default
+算法来执行 DFT，
+其计算复杂度为 O(M log M)，
+其中 M 是网格点的总数（在 NM͂ 的情况下，
+复杂度为 O(N log N)）.
+\end_layout
+
+\begin_layout Subsection
+引力计算
+\end_layout
+
+\begin_layout Standard
+得到了网格上的引力势 
+\begin_inset Formula $\Phi(\vec{x})$
+\end_inset
+
+ 后，
+引力场 
+\begin_inset Formula $\vec{g}(\vec{x})$
+\end_inset
+
+ 可以通过求其负梯度得到：
+ 
+\begin_inset Formula 
+\[
+\vec{g}(\vec{x})=-\nabla\Phi(\vec{x})
+\]
+
+\end_inset
+
+这个梯度运算同样可以在傅里叶空间或实空间进行.
+ 因为 
+\begin_inset Formula $\nabla\leftrightarrow i\vec{k}$
+\end_inset
+
+，
+所以引力场的傅里叶分量为：
+ 
+\begin_inset Formula 
+\[
+\hat{\vec{g}}(\vec{k})=-i\vec{k}\hat{\Phi}(\vec{k})
+\]
+
+\end_inset
+
+我们可以在得到 
+\begin_inset Formula $\hat{\Phi}(\vec{k})$
+\end_inset
+
+ 后，
+直接乘以 
+\begin_inset Formula $-i\vec{k}$
+\end_inset
+
+，
+然后进行一次逆 FFT 得到 
+\begin_inset Formula $\vec{g}(\vec{x})$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+同时，
+我们也可以通过有限差分得到，
+例如，
+x 方向的引力分量可以表示为：
+ 
+\begin_inset Formula 
+\[
+g_{x}(i,j,k)=-\frac{\Phi(i+1,j,k)-\Phi(i-1,j,k)}{2H}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+当然，
+实际中可以使用更高精度的差分公式.
+\end_layout
+
+\begin_layout Subsection
+力插值 (Force Interpolation)
+\end_layout
+
+\begin_layout Standard
+最后一步是将网格点上的引力场 
+\begin_inset Formula $\vec{g}(\vec{x}_{i,j,k})$
+\end_inset
+
+ 插值到每个粒子所在的实际位置 
+\begin_inset Formula $\vec{x}_{p}$
+\end_inset
+
+，
+得到作用在每个粒子上的力 
+\begin_inset Formula $\vec{F}_{p}$
+\end_inset
+
+。
+ 
+\begin_inset Formula 
+\[
+\vec{F}_{p}=m_{p}\vec{g}(\vec{x}_{p})=m_{p}\sum_{i,j,k}\vec{g}(\vec{x}_{i,j,k})W(\vec{x}_{i,j,k}-\vec{x}_{p})
+\]
+
+\end_inset
+
+最后，
+使用一个时间积分方案来更新粒子的速度和位置，
+然后进入下一个时间步，
+重复上述整个过程。
+ 
+\begin_inset Formula 
+\[
+\vec{v}_{p}(t+\Delta t/2)=\vec{v}_{p}(t-\Delta t/2)+\vec{F}_{p}(t)\Delta t/m_{p}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\vec{x}_{p}(t+\Delta t)=\vec{x}_{p}(t)+\vec{v}_{p}(t+\Delta t/2)\Delta t
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
