@@ -8,8 +8,6 @@ L = 50.0         # 模拟盒子的物理尺寸 (Mpc/h)
 BOX_RES = L / N  # 盒子分辨率
 DIM = 2          # 维度
 
-# （总共 65536 个粒子）
-
 H0 = 68.0
 OmegaM = 0.31
 OmegaL = 0.69
@@ -36,7 +34,6 @@ def wave_number(shape, L):
 
 def k_pow(k, n):
     with np.errstate(divide='ignore', invalid='ignore'):
-        # k 是一个包含 kx, ky 的数组，先计算模长
         k_magnitude_sq = (k**2).sum(axis=0)
         k_magnitude = np.sqrt(k_magnitude_sq)
         result = np.where(k_magnitude == 0, 0, k_magnitude**n)

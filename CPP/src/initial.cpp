@@ -78,7 +78,6 @@ void generate(VectorOfVec2D& pos, VectorOfVec2D& mom) {
     for(int i = 0; i < N; ++i) {
         for (int j = 0; j < N; ++j) {
             int idx = i * N + j;
-            // 使用中心差分计算梯度
             double du_x = (phi_real[((i + 1) % N) * N + j][0] - phi_real[((i - 1 + N) % N) * N + j][0]) / (2.0 * BOX_RES);
             double du_y = (phi_real[i * N + ((j + 1) % N)][0] - phi_real[i * N + ((j - 1 + N) % N)][0]) / (2.0 * BOX_RES);
             u[idx] << -du_x, -du_y;
@@ -95,7 +94,6 @@ void generate(VectorOfVec2D& pos, VectorOfVec2D& mom) {
         }
     }
 
-    // --- 释放内存 ---
     fftw_destroy_plan(p_phi_inv);
     fftw_destroy_plan(p_wn_fwd);
     fftw_free(phi_f);

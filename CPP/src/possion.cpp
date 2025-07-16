@@ -36,7 +36,6 @@ void PoissonSolver::cic(const VectorOfVec2D& pos_grid_units, fftw_complex* targe
         target[i][1] = 0.0;
     }
 
-    // 使用线程私有存储来避免竞态条件
     std::vector<std::vector<double>> private_targets(omp_get_max_threads(), std::vector<double>(N * N, 0.0));
 
     #pragma omp parallel
@@ -64,7 +63,6 @@ void PoissonSolver::cic(const VectorOfVec2D& pos_grid_units, fftw_complex* targe
         }
     }
 
-    // 将所有线程私有的结果合并到最终目标数组
     #pragma omp parallel for
     for (int i = 0; i < N * N; ++i) {
         for (int t = 0; t < omp_get_max_threads(); ++t) {
@@ -141,7 +139,6 @@ VectorOfVec2D PoissonSolver::calculate_acceleration(const VectorOfVec2D& pos, do
     #pragma omp parallel for collapse(2)
     for(int i = 0; i < N; ++i) {
         for(int j = 0; j < N; ++j) {
-            // 使用中心差分计算梯度的负值
             double phi_xp1 = phi_real[((i + 1) % N) * N + j][0] * norm_factor;
             double phi_xm1 = phi_real[((i - 1 + N) % N) * N + j][0] * norm_factor;
             double phi_yp1 = phi_real[i * N + ((j + 1) % N)][0] * norm_factor;
