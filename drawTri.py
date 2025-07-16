@@ -30,7 +30,7 @@ def plot_for_time(shape, res, triangles, time, bbox, ax):
     try:
         with open(fn, "rb") as f:
             x_pos = np.load(f)
-            p_mom = np.load(f) # 动量在此次绘图中未使用
+            p_mom = np.load(f)
     except FileNotFoundError:
         print(f"Error: Data file not found: {fn}")
         return
