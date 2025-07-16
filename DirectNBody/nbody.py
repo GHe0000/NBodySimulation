@@ -46,14 +46,12 @@ def calculate_accelerations(pos, mass, halo_mass, G, softening, disk_radius):
     return acc
 
 def setup_initial_conditions(n, r_disk, m_particle, sigma_k):
-    # --- 0. 计算质量并准备数组 ---
     disk_mass_total = n * m_particle
     halo_mass = disk_mass_total * HALO_MASS_RATIO
     pos = np.zeros((n, 3))
     vel = np.zeros((n, 3))
     mass = np.ones(n) * m_particle
 
-    # --- 1. 设置初始位置 ---
     n_rings = n // 10
     n_segments = 10
     particles_per_ring = n_segments
@@ -99,7 +97,6 @@ def setup_initial_conditions(n, r_disk, m_particle, sigma_k):
         vel[i, 0] = -v_mag * pos[i, 1] / radii[i]
         vel[i, 1] =  v_mag * pos[i, 0] / radii[i]
 
-    # --- 3. 增加速度弥散 ---
     ring_radii_avg = np.array([(i + 0.5) * (r_disk / n_rings) for i in range(n_rings)])
     # FIX: 防止因速度为0导致log(0)错误
     safe_v_profile = np.where(v_circ_profile > 0, v_circ_profile, 1e-9)
@@ -187,7 +184,7 @@ def run_simulation(sim_time, dt, pos, vel, mass, halo_mass, G, softening, disk_r
 
 if __name__ == '__main__':
     pos_init, vel_init, mass, P_outer = setup_initial_conditions(N, R, PARTICLE_MASS, SIGMA_CONST)
-    SIM_TIME = P_outer * 2.0 # 模拟两个外圈轨道周期
+    SIM_TIME = P_outer * 2.0 # 模拟两个周期
     disk_mass_total = N * PARTICLE_MASS
     halo_mass_total = disk_mass_total * HALO_MASS_RATIO
     
