@@ -382,9 +382,12 @@ End
 
 \begin_body
 
-\begin_layout Standard
-记 M 为维度数，
-记 N 为一边的网格数
+\begin_layout Title
+NBody 宇宙学模拟
+\end_layout
+
+\begin_layout Author
+Guotao He
 \end_layout
 
 \begin_layout Section
@@ -994,11 +997,11 @@ Zel'dovich 近似（简称为 ZA）描述了粒子最初的动力学演化过程
 \begin_layout Standard
 ZA 的核心假设是，
 这个位移场 
-\begin_inset Formula $S\left(\boldsymbol{q},t\right)$
+\begin_inset Formula $\boldsymbol{S}\left(\boldsymbol{q},t\right)$
 \end_inset
 
  可以写成一个不随时间改变的空间部分 
-\begin_inset Formula $s\left(\boldsymbol{q}\right)$
+\begin_inset Formula $\boldsymbol{s}\left(\boldsymbol{q}\right)$
 \end_inset
 
  和一个只随时间改变的时间部分 
@@ -1227,7 +1230,7 @@ ZA 的核心假设是，
  的初始值.
  一般而言，
 我们通过天文观测得到的 CMB 功率谱生成出早期的引力势，
-而位置坐标和动量坐标则通过 Zeldovich 近似给出.
+而位置坐标和动量坐标则通过 Zel'dovich 近似给出.
  
 \end_layout
 
@@ -1236,7 +1239,218 @@ ZA 的核心假设是，
 \end_layout
 
 \begin_layout Subsection
-Leap-forg 法
+蛙跳法
+\end_layout
+
+\begin_layout Standard
+在前文中，
+我们给出了粒子的位置和速度随标度因子 
+\begin_inset Formula $a$
+\end_inset
+
+ 的关系：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\mathrm{d}\boldsymbol{x}}{\mathrm{d}a} & =\frac{\boldsymbol{v}}{a^{3}H\left(a\right)}\to\frac{\mathrm{d}\boldsymbol{x}}{\mathrm{d}a}=f_{x}\left(\boldsymbol{v}\right)\\
+\frac{\mathrm{d}\boldsymbol{v}}{\mathrm{d}a} & =-\nabla\Phi\left(\boldsymbol{x}\right)\to\frac{\mathrm{d}\boldsymbol{v}}{\mathrm{d}a}=f_{v}\left(\boldsymbol{x}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+我们的目标就是数值求解上述方程组.
+ 在宇宙学模拟中我们使用
+\series bold
+蛙跳法
+\series default
+:
+ 蛙跳法的精髓在于其在一个交错的网格上进行计算：
+
+\end_layout
+
+\begin_layout Itemize
+位置 
+\begin_inset Formula $\boldsymbol{x}_{i}$
+\end_inset
+
+ 在整数时间步进行计算：
+
+\begin_inset Formula $a_{0},a_{1},\dots$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+速度 
+\begin_inset Formula $\boldsymbol{v}_{i+1/2}$
+\end_inset
+
+ 在半整数时间步上计算：
+
+\begin_inset Formula $a_{1/2},a_{3/2},\dots$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+我们想从当前位置 
+\begin_inset Formula $\boldsymbol{x}_{i}$
+\end_inset
+
+和中间点的速度 
+\begin_inset Formula $\boldsymbol{v}_{i+1/2}$
+\end_inset
+
+ 得到下一个位置 
+\begin_inset Formula $\boldsymbol{x}_{i+1}$
+\end_inset
+
+，
+我们将位置 
+\begin_inset Formula $\boldsymbol{x}_{i+1}$
+\end_inset
+
+在中间点 
+\begin_inset Formula $a_{i+1/2}$
+\end_inset
+
+ 进行展开：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\boldsymbol{x}_{i+1}=\boldsymbol{x}_{i+1/2}+\boldsymbol{x}_{t+1/2}^{'}\frac{\Delta a}{2}+\dots
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+同理，
+将 
+\begin_inset Formula $\boldsymbol{x}_{i}$
+\end_inset
+
+ 在中间点 
+\begin_inset Formula $a_{i+1/2}$
+\end_inset
+
+ 进行展开：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\boldsymbol{x}_{i}=\boldsymbol{x}_{i+1/2}-\boldsymbol{x}_{t+1/2}^{'}\frac{\Delta a}{2}+\dots
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+一式减二式，
+得到：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\boldsymbol{x}_{i+1}-\boldsymbol{x}_{i}=\boldsymbol{x}_{t+1/2}^{'}\Delta a+O\left(\left(\Delta a\right)^{3}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+因此：
+
+\begin_inset Formula 
+\[
+\boldsymbol{x}_{i+1}\to\boldsymbol{x}_{i}+f_{x}\left(\boldsymbol{v}_{i+1/2}\right)\Delta a
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+同理，
+对于速度有：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\boldsymbol{v}_{i+1/2}\to\boldsymbol{v}_{i-1/2}+f_{v}\left(\boldsymbol{x}_{i}\right)\Delta a
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+上述过程即构成了蛙跳法的循环：
+
+\end_layout
+
+\begin_layout Itemize
+Kick：
+
+\begin_inset Formula $\boldsymbol{v}_{i+1/2}\to\boldsymbol{v}_{i-1/2}+f_{v}\left(\boldsymbol{x}_{i}\right)\frac{\Delta a}{2}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Drift：
+
+\begin_inset Formula $\boldsymbol{x}_{i+1}\to\boldsymbol{x}_{i}+f_{x}\left(\boldsymbol{v}_{i+1/2}\right)\Delta a$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Kick：
+
+\begin_inset Formula $\boldsymbol{v}_{i+1}\to\boldsymbol{v}_{i+1/2}+f_{v}\left(\boldsymbol{x}_{i+1}\right)\frac{\Delta a}{2}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+这里之所以我们使用蛙跳法而不是更常用的精度更高的 RK4 等求解方法，
+一个很重要的原因是蛙跳法是一种辛算法，
+其在数值上保持了哈密顿系统的几何结构.
+ 不难发现，
+蛙跳法的每一步都是相空间的一个剪切变换，
+其不改变相空间的体积，
+因此其保持了能量和动量等守恒量在长时间的守恒.
+ 而更常见的 RK4 则没有这一点.
 \end_layout
 
 \begin_layout Subsection
@@ -1244,25 +1458,30 @@ PM 法
 \end_layout
 
 \begin_layout Standard
-在宇宙学 N-Body 模拟中，
-我们需要求解数以百万计甚至百亿计的暗物质粒子在自身引力作用下的演化。
-直接计算任意两个粒子之间的引力（Direct Summation,
- DS）需要 O(N²) 的计算量，
-这对于大规模模拟是不可接受的。
-粒子-网格（Particle-Mesh,
- PM）方法是一种经典且高效的算法，
-它将长程引力的计算复杂度降低到 O(N log N)，
+在 NBody 宇宙学模拟中，
+我们需要求解数以百万计甚至百亿计的暗物质粒子在自身引力作用下的演化.
+ 我们可以直接计算任意两个粒子之间的引力，
+但这需要 
+\begin_inset Formula $\mathcal{O}\left(N^{2}\right)$
+\end_inset
+
+ 的计算量，
+这对于大规模模拟是不可接受的.
+ 粒子-网格法（PM 法）则可以将长程引力的计算复杂度降低到 
+\begin_inset Formula $\mathcal{O}\left(N^{2}\right)$
+\end_inset
+
+，
 极大地提升了模拟效率.
 \end_layout
 
 \begin_layout Standard
 PM 方法的核心思想是：
 将粒子所代表的离散质量分布“绘制”到一个规则的计算网格上，
-然后在网格上利用快速傅里叶变换（Fast Fourier Transform,
- FFT）高效地求解引力势，
+然后在网格上利用快速傅里叶变换高效地求解引力势，
 再从引力势计算出引力场，
 最后将网格上的引力场插值回粒子所在的位置，
-从而驱动粒子的运动.
+从而求解粒子的受力.
 \end_layout
 
 \begin_layout Subsection
