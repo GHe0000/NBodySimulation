@@ -192,7 +192,7 @@ rightmargin=0cm % Outside right margin width
 \newenvironment{attention}{\begin{attentionBox}}{\end{attentionBox}}
 
 % 浮动体设置
-\floatplacement{figure}{htbp}
+\floatplacement{figure}{H}
 \end_preamble
 \use_default_options true
 \maintain_unincluded_children no
@@ -1468,7 +1468,7 @@ PM 法
  的计算量，
 这对于大规模模拟是不可接受的.
  粒子-网格法（PM 法）则可以将长程引力的计算复杂度降低到 
-\begin_inset Formula $\mathcal{O}\left(N^{2}\right)$
+\begin_inset Formula $\mathcal{O}\left(N\log N\right)$
 \end_inset
 
 ，
@@ -1484,78 +1484,63 @@ PM 方法的核心思想是：
 从而求解粒子的受力.
 \end_layout
 
-\begin_layout Subsection
-PM 方法的数学框架
+\begin_layout Standard
+在前文中，
+我们得到引力势满足的泊松方程：
+
 \end_layout
 
 \begin_layout Standard
-整个宇宙的物质密度可以表示为 
-\begin_inset Formula $\rho(\vec{x},t)$
-\end_inset
-
-，
-它产生的引力势 
-\begin_inset Formula $\Phi(\vec{x},t)$
-\end_inset
-
- 由下面的泊松方程（Poisson's Equation）描述：
- 
 \begin_inset Formula 
 \[
-\nabla^{2}\Phi(\vec{x},t)=4\pi G\rho(\vec{x},t)
+\nabla^{2}\Phi=\frac{3}{2}\frac{H_{0}^{2}\Omega_{m0}}{a^{2}H\left(a\right)}\delta\left(\boldsymbol{x},t\right)
 \]
 
 \end_inset
 
-在宇宙学中，
-通常使用共动坐标（comoving coordinates），
-此时泊松方程会包含宇宙膨胀因子 
-\begin_inset Formula $a(t)$
-\end_inset
 
-，
-形式变为：
- 
+\end_layout
+
+\begin_layout Standard
+同时，
+我们的速度满足：
+
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \[
-\nabla^{2}\Phi=4\pi Ga^{2}\bar{\rho}\delta
+\frac{\mathrm{d}\boldsymbol{v}}{\mathrm{d}a}=-\nabla\Phi\left(\boldsymbol{x}\right)
 \]
 
 \end_inset
 
-其中 
-\begin_inset Formula $\bar{\rho}$
-\end_inset
 
- 是宇宙的平均密度，
+\end_layout
 
-\begin_inset Formula $\delta=(\rho-\bar{\rho})/\bar{\rho}$
-\end_inset
-
- 是密度扰动（density contrast）。
-我们的目标就是求解这个方程，
-得到引力势 
+\begin_layout Standard
+我们的目标就是求解出 
 \begin_inset Formula $\Phi$
 \end_inset
 
-，
-然后通过 
-\begin_inset Formula $\vec{g}=-\nabla\Phi$
+ 并计算其梯度 
+\begin_inset Formula $\nabla\Phi$
 \end_inset
 
- 计算引力场，
-最终更新粒子的速度和位置.
-\end_layout
+，
+从而给出 
+\begin_inset Formula $\mathrm{d}\boldsymbol{v}/\mathrm{d}a$
+\end_inset
 
-\begin_layout Standard
-PM 方法将这个求解过程分为以下四个主要步骤：
+，
+PM 法将这个求解过程分为以下四个主要步骤：
  
 \end_layout
 
 \begin_layout Enumerate
 
 \series bold
-质量分配（Mass Assignment）
+质量分配
 \series default
 ：
 将粒子的质量分配到网格点上，
@@ -1565,7 +1550,7 @@ PM 方法将这个求解过程分为以下四个主要步骤：
 \begin_layout Enumerate
 
 \series bold
-泊松方程求解（Solving Poisson's Equation）
+泊松方程求解
 \series default
 ：
 利用 FFT 在傅里叶空间中求解泊松方程，
@@ -1575,7 +1560,7 @@ PM 方法将这个求解过程分为以下四个主要步骤：
 \begin_layout Enumerate
 
 \series bold
-引力计算（Force Calculation）
+引力计算
 \series default
 ：
 通过对引力势求梯度，
@@ -1585,35 +1570,47 @@ PM 方法将这个求解过程分为以下四个主要步骤：
 \begin_layout Enumerate
 
 \series bold
-力插值（Force Interpolation）
+力插值
 \series default
 ：
 将网格点上的引力场插值到每个粒子的实际位置.
 \end_layout
 
 \begin_layout Subsection
-质量分配 (Mass Assignment)
+质量分配
 \end_layout
 
 \begin_layout Standard
-第一步是将代表连续质量分布的 N 个离散粒子“云”的质量分配到一个三维的规则网格上。
-假设我们的模拟盒子是一个边长为 L 的立方体，
+PM 法需要通过傅里叶变换来加速，
+而在计算机计算中，
+我们只能对一个网格进行傅里叶变换，
+因此我们需要将位置随意的粒子分配到网格上.
+ 我们假设一共有 
+\begin_inset Formula $N$
+\end_inset
+
+ 个粒子，
+模拟的盒子是一个边长为 
+\begin_inset Formula $L_{tot}$
+\end_inset
+
+ 的立方体，
 被划分为 
 \begin_inset Formula $M\times M\times M$
 \end_inset
 
- 个网格单元，
-每个网格单元的边长为 
-\begin_inset Formula $H=L/M$
+ 个单元，
+每个单元的边长为：
+
+\begin_inset Formula $L=L_{tot}/M$
 \end_inset
 
-。
-
+.
 \end_layout
 
 \begin_layout Standard
 令 
-\begin_inset Formula $\vec{x}_{p}$
+\begin_inset Formula $\boldsymbol{x}_{p}$
 \end_inset
 
  为第 p 个粒子的位置，
@@ -1621,35 +1618,40 @@ PM 方法将这个求解过程分为以下四个主要步骤：
 \begin_inset Formula $m_{p}$
 \end_inset
 
-。
-网格点的密度 
+.
+ 网格点的值为 
 \begin_inset Formula $\rho_{i,j,k}$
 \end_inset
 
- 可以通过一个分配函数 
-\begin_inset Formula $W(\vec{x})$
+ （
+\begin_inset Formula $i,j,k$
 \end_inset
 
- 来计算。
-这个函数将粒子位置 
-\begin_inset Formula $\vec{x}_{p}$
+ 为网格的索引）.
+ 可以通过一个分配函数 
+\begin_inset Formula $W\left(\boldsymbol{x}\right)$
+\end_inset
+
+ 来计算.
+ 这个函数将粒子位置 
+\begin_inset Formula $\boldsymbol{x}_{p}$
 \end_inset
 
  与网格点索引 
 \begin_inset Formula $(i,j,k)$
 \end_inset
 
- 关联起来。
+ 关联起来.
  
 \begin_inset Formula 
 \[
-\rho_{i,j,k}=\frac{1}{H^{3}}\sum_{p}m_{p}W(\vec{x}_{i,j,k}-\vec{x}_{p})
+\rho_{i,j,k}=\frac{1}{L^{3}}\sum_{p}m_{p}W(\boldsymbol{x}_{i,j,k}-\boldsymbol{x}_{p})
 \]
 
 \end_inset
 
 其中 
-\begin_inset Formula $\vec{x}_{i,j,k}$
+\begin_inset Formula $\boldsymbol{x}_{i,j,k}$
 \end_inset
 
  是网格点 
@@ -1657,11 +1659,56 @@ PM 方法将这个求解过程分为以下四个主要步骤：
 \end_inset
 
  的坐标.
- 最常用的分配方案为 CIC 也就是云中单元分配方案.
- 它将每个粒子看作一个与网格单元同样大小的均匀立方体“云”，
+\end_layout
+
+\begin_layout Standard
+最简单的一种质量分配方法就是将粒子的质量分配到离他最近的网格处（最近邻网格法，
+NGP）.
+ 但这会造成质量的“瞬移”，
+带来数值噪音.
+ 一种更常用的方法是云中单元法（CIC 法）.
+ 其将每个粒子看成一个同网格单元同样大小的均匀立方体“云”，
 然后根据该“云”与周围网格单元的重叠体积，
-将质量按比例分配给相邻的 8 个网格点（在三维情况下）。
-这等价于对粒子位置进行线性插值。
+将质量按比例分配给相邻的网格点.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement document
+alignment document
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename cic.png
+	lyxscale 20
+	width 35line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+CIC 分配示意图
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
@@ -1685,72 +1732,54 @@ PM 方法将这个求解过程分为以下四个主要步骤：
  
 \begin_inset Formula 
 \[
-w_{i}=1-\frac{x_{p}-x_{i}}{H}\quad\text{and}\quad w_{i+1}=\frac{x_{p}-x_{i}}{H}
+w_{i}=1-\frac{x_{p}-x_{i}}{L}\quad w_{i+1}=\frac{x_{p}-x_{i}}{L}
 \]
 
 \end_inset
 
 在三维中，
 就是这三个方向权重的乘积.
+ 
 \end_layout
 
 \begin_layout Subsection
-泊松方程求解 (FFT)
+泊松方程求解
 \end_layout
 
 \begin_layout Standard
 获得网格上的密度场 
-\begin_inset Formula $\rho(\vec{x})$
+\begin_inset Formula $\rho$
 \end_inset
 
- 后（为了简洁，
-我们省略下标 
-\begin_inset Formula $i,j,k$
+ 后，
+将其转化为微扰场 
+\begin_inset Formula $\delta$
 \end_inset
 
-），
-下一步是求解泊松方程 
-\begin_inset Formula $\nabla^{2}\Phi=4\pi G\rho$
+，
+下一步是求解方程
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\nabla^{2}\Phi=\frac{3}{2}\frac{H_{0}^{2}\Omega_{m0}}{a^{2}H\left(a\right)}\delta\left(\boldsymbol{x},t\right)
+\]
+
 \end_inset
 
-。
-直接在实空间求解这个偏微分方程很困难，
-但在傅里叶空间（或 k 空间）它会变成一个简单的代数方程。
 
 \end_layout
 
 \begin_layout Standard
-首先，
-对密度场和引力势进行离散傅里叶变换（Discrete Fourier Transform,
- DFT）：
- 
-\begin_inset Formula 
-\[
-\hat{\rho}(\vec{k})=\sum_{\vec{x}}\rho(\vec{x})e^{-i\vec{k}\cdot\vec{x}}
-\]
-
-\end_inset
-
-
-\begin_inset Formula 
-\[
-\hat{\Phi}(\vec{k})=\sum_{\vec{x}}\Phi(\vec{x})e^{-i\vec{k}\cdot\vec{x}}
-\]
-
-\end_inset
-
-其中 
-\begin_inset Formula $\vec{k}$
-\end_inset
-
- 是傅里叶空间中的波矢。
+我们将上述方程进行傅里叶变换，
 在傅里叶空间，
 微分算子 
 \begin_inset Formula $\nabla$
 \end_inset
 
  变成了代数乘子 
-\begin_inset Formula $i\vec{k}$
+\begin_inset Formula $\mathrm{i}\boldsymbol{k}$
 \end_inset
 
 。
@@ -1760,113 +1789,80 @@ w_{i}=1-\frac{x_{p}-x_{i}}{H}\quad\text{and}\quad w_{i+1}=\frac{x_{p}-x_{i}}{H}
 \end_inset
 
  对应于 
-\begin_inset Formula $-|\vec{k}|^{2}$
+\begin_inset Formula $-\left|\boldsymbol{k}\right|^{2}$
 \end_inset
 
-。
-泊松方程就变成了：
- 
-\begin_inset Formula 
-\[
--|\vec{k}|^{2}\hat{\Phi}(\vec{k})=4\pi G\hat{\rho}(\vec{k})
-\]
-
-\end_inset
-
-于是，
-我们可以直接解出引力势的傅里叶分量：
- 
-\begin_inset Formula 
-\[
-\hat{\Phi}(\vec{k})=-4\pi G\frac{\hat{\rho}(\vec{k})}{|\vec{k}|^{2}}
-\]
-
-\end_inset
-
-这个代数方程的求解非常简单。
-我们定义傅里叶空间中的
-\series bold
-格林函数（Green's function）
-\series default
- 
-\begin_inset Formula $\hat{G}(\vec{k})$
-\end_inset
-
-：
- 
-\begin_inset Formula 
-\[
-\hat{G}(\vec{k})=-\frac{4\pi G}{|\vec{k}|^{2}}
-\]
-
-\end_inset
-
-于是，
-
-\begin_inset Formula $\hat{\Phi}(\vec{k})=\hat{G}(\vec{k})\hat{\rho}(\vec{k})$
-\end_inset
-
-。
+，
+从而上述方程变为：
 
 \end_layout
 
 \begin_layout Standard
+\begin_inset Formula 
+\[
+-\left|\boldsymbol{k}\right|^{2}\hat{\Phi}\left(\boldsymbol{k}\right)=\frac{3}{2}\frac{H_{0}^{2}\Omega_{m0}}{a^{2}H\left(a\right)}\hat{\delta}\left(\boldsymbol{k}\right)
+\]
 
-\series bold
-注意
-\series default
-：
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+于是我们可以直接得到：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\hat{\Phi}\left(\boldsymbol{k}\right)=-\frac{3}{2}\frac{H_{0}^{2}\Omega_{m0}}{a^{2}H\left(a\right)}\frac{1}{\left|\boldsymbol{k}\right|^{2}}\hat{\delta}\left(\boldsymbol{k}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+这是一个非常简单的代数方程.
+ 注意，
 对于 
-\begin_inset Formula $\vec{k}=0$
+\begin_inset Formula $\boldsymbol{k}=0$
 \end_inset
 
  的模式（对应宇宙的平均密度），
-分母为零。
-这个模式不产生引力，
-通常设 
-\begin_inset Formula $\hat{\Phi}(\vec{k}=0)=0$
+分母为零.
+ 这个模式不产生引力，
+通常直接设 
+\begin_inset Formula $\hat{\Phi}(\boldsymbol{k}=0)=0$
 \end_inset
 
-。
-此外，
-由于网格的离散性，
-拉普拉斯算子 
-\begin_inset Formula $\nabla^{2}$
+.
+ 得到 
+\begin_inset Formula $\hat{\Phi}\left(\boldsymbol{k}\right)$
 \end_inset
 
- 和波矢 
-\begin_inset Formula $\vec{k}$
+ 后，
+我们再通过逆变换得到 
+\begin_inset Formula $\Phi\left(\boldsymbol{x}\right)$
 \end_inset
 
- 实际上需要使用它们的有限差分近似形式，
-以获得更高的精度。
-例如，
-波数分量 
-\begin_inset Formula $k_{x}$
-\end_inset
-
- 可以用 
-\begin_inset Formula $k_{x}=\frac{2}{H}\sin(\frac{\pi i}{M})$
-\end_inset
-
- 来代替简单的 
-\begin_inset Formula $i/H$
-\end_inset
-
-。
-
+.
 \end_layout
 
 \begin_layout Standard
-实际计算中，
+在实际计算中，
 我们使用
 \series bold
 快速傅里叶变换（FFT）
 \series default
-算法来执行 DFT，
-其计算复杂度为 O(M log M)，
-其中 M 是网格点的总数（在 NM 的情况下，
-复杂度为 O(N log N)）.
+算法来进行傅里叶变换，
+其计算复杂度为 
+\begin_inset Formula $\mathcal{O}\left(N\log N\right)$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
@@ -1875,64 +1871,70 @@ w_{i}=1-\frac{x_{p}-x_{i}}{H}\quad\text{and}\quad w_{i+1}=\frac{x_{p}-x_{i}}{H}
 
 \begin_layout Standard
 得到了网格上的引力势 
-\begin_inset Formula $\Phi(\vec{x})$
+\begin_inset Formula $\Phi\left(\boldsymbol{x}\right)$
 \end_inset
 
  后，
-引力场 
-\begin_inset Formula $\vec{g}(\vec{x})$
+
+\begin_inset Formula $\mathrm{d}\boldsymbol{v}/\mathrm{d}a$
 \end_inset
 
  可以通过求其负梯度得到：
  
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \[
-\vec{g}(\vec{x})=-\nabla\Phi(\vec{x})
+\frac{\mathrm{d}\boldsymbol{v}}{\mathrm{d}a}=-\nabla\Phi\left(\boldsymbol{x}\right)
 \]
 
 \end_inset
 
-这个梯度运算同样可以在傅里叶空间或实空间进行.
+
+\end_layout
+
+\begin_layout Standard
+这个梯度运算同样可以在傅里叶空间进行.
  因为 
-\begin_inset Formula $\nabla\leftrightarrow i\vec{k}$
+\begin_inset Formula $\nabla\leftrightarrow\mathrm{i}\boldsymbol{k}$
 \end_inset
 
 ，
-所以引力场的傅里叶分量为：
- 
-\begin_inset Formula 
-\[
-\hat{\vec{g}}(\vec{k})=-i\vec{k}\hat{\Phi}(\vec{k})
-\]
-
-\end_inset
-
-我们可以在得到 
-\begin_inset Formula $\hat{\Phi}(\vec{k})$
+所以我们可以在得到 
+\begin_inset Formula $\hat{\Phi}\left(\boldsymbol{k}\right)$
 \end_inset
 
  后，
 直接乘以 
-\begin_inset Formula $-i\vec{k}$
+\begin_inset Formula $-\mathrm{i}\boldsymbol{k}$
 \end_inset
 
 ，
-然后进行一次逆 FFT 得到 
-\begin_inset Formula $\vec{g}(\vec{x})$
+然后进行一次逆傅里叶变换得到 
+\begin_inset Formula $\mathrm{d}\boldsymbol{v}/\mathrm{d}a$
 \end_inset
 
 .
 \end_layout
 
 \begin_layout Standard
-同时，
+当然，
 我们也可以通过有限差分得到，
 例如，
-x 方向的引力分量可以表示为：
+
+\begin_inset Formula $x$
+\end_inset
+
+ 方向的引力（
+\begin_inset Formula $x$
+\end_inset
+
+ 方向的速度变化率）可以表示为：
  
 \begin_inset Formula 
 \[
-g_{x}(i,j,k)=-\frac{\Phi(i+1,j,k)-\Phi(i-1,j,k)}{2H}
+\left(\frac{\mathrm{d}v_{x}}{\mathrm{d}a}\right)\left(i,j,k\right)=-\frac{\Phi(i+1,j,k)-\Phi(i-1,j,k)}{2L}
 \]
 
 \end_inset
@@ -1941,58 +1943,113 @@ g_{x}(i,j,k)=-\frac{\Phi(i+1,j,k)-\Phi(i-1,j,k)}{2H}
 \end_layout
 
 \begin_layout Standard
-当然，
 实际中可以使用更高精度的差分公式.
 \end_layout
 
 \begin_layout Subsection
-力插值 (Force Interpolation)
+力插值
 \end_layout
 
 \begin_layout Standard
-最后一步是将网格点上的引力场 
-\begin_inset Formula $\vec{g}(\vec{x}_{i,j,k})$
-\end_inset
-
- 插值到每个粒子所在的实际位置 
-\begin_inset Formula $\vec{x}_{p}$
+最后一步是将网格点上的引力插值到每个粒子所在的实际位置 
+\begin_inset Formula $\boldsymbol{x}_{p}$
 \end_inset
 
 ，
-得到作用在每个粒子上的力 
-\begin_inset Formula $\vec{F}_{p}$
+得到作用在每个粒子上的引力 
+\begin_inset Formula $\mathrm{d}\boldsymbol{v}_{p}/\mathrm{d}a$
 \end_inset
 
-。
+.
+ 为了保证整个模拟系统的动量守恒，
+力插值必须使用与质量分配完全相同的插值函数来将网格的力“分配”回粒子.
+ 前文中我们使用了 CIC 法进行质量分配，
+因此这里我们也使用 CIC 方案进行力插值.
+\end_layout
+
+\begin_layout Standard
+设一个粒子 
+\begin_inset Formula $p$
+\end_inset
+
+ 位于 
+\begin_inset Formula $\bm{x}_{p}$
+\end_inset
+
+，
+它被一个由8个网格点构成的立方单元所包围.
+ 我们在之前计算出了这 
+\begin_inset Formula $8$
+\end_inset
+
+ 个角点上的引力向量 
+\begin_inset Formula $\left(\mathrm{d}\bm{v}/\mathrm{d}a\right)_{i,j,k}$
+\end_inset
+
+.
+ 作用在粒子 
+\begin_inset Formula $p$
+\end_inset
+
+ 上的引力 
+\begin_inset Formula $\left(\mathrm{d}\bm{v}/\mathrm{d}a\right)_{p}$
+\end_inset
+
+ 就是这 
+\begin_inset Formula $8$
+\end_inset
+
+ 个网格点上引力的加权平均：
  
 \begin_inset Formula 
 \[
-\vec{F}_{p}=m_{p}\vec{g}(\vec{x}_{p})=m_{p}\sum_{i,j,k}\vec{g}(\vec{x}_{i,j,k})W(\vec{x}_{i,j,k}-\vec{x}_{p})
+\left(\frac{\mathrm{d}\bm{v}}{\mathrm{d}a}\right)_{p}=\sum_{l,m,n\in\{0,1\}}\left(\frac{\mathrm{d}\bm{v}}{\mathrm{d}a}\right)_{i+l,j+m,k+n}\cdot w_{i+l,j+m,k+n}
 \]
 
 \end_inset
 
-最后，
-使用一个时间积分方案来更新粒子的速度和位置，
-然后进入下一个时间步，
-重复上述整个过程。
+这里的权重 
+\begin_inset Formula $w$
+\end_inset
+
+ 与质量分配的权重完全相同.
+ 例如，
+对于一维情况，
+粒子在 
+\begin_inset Formula $x_{p}$
+\end_inset
+
+ 处，
+其左右两个网格点为 
+\begin_inset Formula $x_{i}$
+\end_inset
+
+ 和 
+\begin_inset Formula $x_{i+1}$
+\end_inset
+
+，
+则作用在粒子上的力为：
  
 \begin_inset Formula 
 \[
-\vec{v}_{p}(t+\Delta t/2)=\vec{v}_{p}(t-\Delta t/2)+\vec{F}_{p}(t)\Delta t/m_{p}
+\left(\frac{\mathrm{d}v}{\mathrm{d}a}\right)_{p}=\left(\frac{\mathrm{d}v}{\mathrm{d}a}\right)_{i}\cdot\left(1-\frac{x_{p}-x_{i}}{L}\right)+\left(\frac{\mathrm{d}v}{\mathrm{d}a}\right)_{i+1}\cdot\left(\frac{x_{p}-x_{i}}{L}\right)
 \]
 
 \end_inset
 
+在三维中，
+这同样是三个方向权重的乘积.
+\end_layout
 
-\begin_inset Formula 
-\[
-\vec{x}_{p}(t+\Delta t)=\vec{x}_{p}(t)+\vec{v}_{p}(t+\Delta t/2)\Delta t
-\]
-
+\begin_layout Standard
+得到 
+\begin_inset Formula $\mathrm{d}\boldsymbol{v}/\mathrm{d}a$
 \end_inset
 
-
+ 后，
+即可通过蛙跳法进行粒子位置和动量的更新，
+并以此循环.
 \end_layout
 
 \end_body
