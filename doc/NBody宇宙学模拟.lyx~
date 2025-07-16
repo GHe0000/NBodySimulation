@@ -390,6 +390,22 @@ NBody 宇宙学模拟
 Guotao He
 \end_layout
 
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 基本方程
 \end_layout
@@ -1179,7 +1195,7 @@ ZA 的核心假设是，
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\boldsymbol{v}\to-aHf\nabla\nabla^{-2}\delta
+\boldsymbol{v}\to-aHf\nabla\nabla^{-2}\delta\left(\boldsymbol{x}\right)
 \]
 
 \end_inset
@@ -1230,8 +1246,75 @@ ZA 的核心假设是，
  的初始值.
  一般而言，
 我们通过天文观测得到的 CMB 功率谱生成出早期的引力势，
-而位置坐标和动量坐标则通过 Zel'dovich 近似给出.
+而位置坐标和动量坐标则通过 ZA 给出.
  
+\end_layout
+
+\begin_layout Standard
+要通过功率谱生成初始的引力势，
+首先我们先生成一个高斯随机场，
+作为初始的引力势.
+ 然后我们对其进行傅里叶变换，
+在傅里叶空间将场乘上 
+\begin_inset Formula $\sqrt{P\left(k\right)}$
+\end_inset
+
+ 缩放模长，
+从而得到初始时刻的微扰场（的傅里叶表示）：
+
+\begin_inset Formula $\hat{\delta}\left(\boldsymbol{k}\right)$
+\end_inset
+
+ .
+ 为了保证微扰场 
+\begin_inset Formula $\delta\left(\boldsymbol{x}\right)$
+\end_inset
+
+ 是实数，
+我们要求：
+
+\begin_inset Formula $\hat{\delta}\left(\boldsymbol{k}\right)=\hat{\delta}^{*}\left(\boldsymbol{k}\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+在有了初始的微扰场后，
+我们通过 ZA 给出每个粒子的位置坐标和动量坐标：
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\boldsymbol{x} & \to\boldsymbol{x}-\nabla\nabla^{-2}\delta\left(\boldsymbol{x}\right)\\
+\boldsymbol{v} & \to-aHf\nabla\nabla^{-2}\delta\left(\boldsymbol{x}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+上述即给出每个粒子的初始位置和速度.
+\end_layout
+
+\begin_layout Standard
+另外这里粒子的初始位置之所以不是通过直接对初始的微扰场 
+\begin_inset Formula $\delta\left(\boldsymbol{x}\right)$
+\end_inset
+
+ 进行采样是因为后者在数学上是一个泊松采样过程，
+其会引入
+\series bold
+散粒噪声
+\series default
+，
+这种噪声的功率谱是白噪声，
+即在所有尺度上都会引入这一噪声，
+使得我们生成的微扰场的功率谱和我们想要的不同.
 \end_layout
 
 \begin_layout Section
@@ -1576,7 +1659,7 @@ PM 法将这个求解过程分为以下四个主要步骤：
 将网格点上的引力场插值到每个粒子的实际位置.
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Subsubsection
 质量分配
 \end_layout
 
@@ -1742,7 +1825,7 @@ w_{i}=1-\frac{x_{p}-x_{i}}{L}\quad w_{i+1}=\frac{x_{p}-x_{i}}{L}
  
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Subsubsection
 泊松方程求解
 \end_layout
 
@@ -1865,7 +1948,7 @@ w_{i}=1-\frac{x_{p}-x_{i}}{L}\quad w_{i+1}=\frac{x_{p}-x_{i}}{L}
 .
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Subsubsection
 引力计算
 \end_layout
 
@@ -1946,7 +2029,7 @@ w_{i}=1-\frac{x_{p}-x_{i}}{L}\quad w_{i+1}=\frac{x_{p}-x_{i}}{L}
 实际中可以使用更高精度的差分公式.
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Subsubsection
 力插值
 \end_layout
 
